@@ -210,7 +210,7 @@ public class UIPhotonWaitingRoom : UIBase
         {
             nonHostObject.SetActive(HostPlayerID != PhotonNetwork.LocalPlayer.UserId);
         }
-        if (PhotonNetwork.player.IsMasterClient && hostAlwaysReady)
+        if (PhotonNetwork.LocalPlayer.IsMasterClient && hostAlwaysReady)
             SimplePhotonNetworkManager.Singleton.SetPlayerState(PlayerState.Ready);
     }
 

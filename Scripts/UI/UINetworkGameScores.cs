@@ -22,7 +22,7 @@ public class UINetworkGameScores : MonoBehaviour
                     userRanking.SetData(j + 1, ranking);
                 }
 
-                var isLocal = BaseNetworkGameCharacter.Local != null && ranking.viewId.Equals(BaseNetworkGameCharacter.Local.photonView.viewID);
+                var isLocal = BaseNetworkGameCharacter.Local != null && ranking.viewId.Equals(BaseNetworkGameCharacter.Local.photonView.ViewID);
                 if (isLocal)
                     UpdateLocalRank(j + 1, ranking);
                 ++j;

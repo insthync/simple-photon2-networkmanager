@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Pun.UtilityScripts;
 
 public class UINetworkGameScoreEntry : MonoBehaviour
 {
@@ -50,7 +51,7 @@ public class UINetworkGameScoreEntry : MonoBehaviour
             }
         }
 
-        var isLocal = BaseNetworkGameCharacter.Local != null && ranking.viewId.Equals(BaseNetworkGameCharacter.Local.photonView.viewID);
+        var isLocal = BaseNetworkGameCharacter.Local != null && ranking.viewId.Equals(BaseNetworkGameCharacter.Local.photonView.ViewID);
         SetTextColor(isLocal, textRank);
         SetTextColor(isLocal, textName);
         SetTextColor(isLocal, textScore);
