@@ -32,6 +32,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public static System.Action<List<NetworkDiscoveryData>> onReceivedRoomListUpdate;
     public static System.Action<DisconnectCause> onConnectionError;
     public static System.Action<short, string> onRoomConnectError;
+    public static System.Action onConnectingToMaster;
+    public static System.Action onConnectedToMaster;
     public static System.Action onJoiningLobby;
     public static System.Action onJoinedLobby;
     public static System.Action onJoiningRoom;
@@ -55,6 +57,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public int sendRate = 20;
     public byte maxConnections;
     public string roomName;
+    public bool autoJoinLobby;
     public SimplePhotonStartPoint[] StartPoints { get; protected set; }
     public bool isConnectOffline { get; protected set; }
     private bool startGameOnRoomCreated;
@@ -76,6 +79,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             view = gameObject.AddComponent<PhotonView>();
         view.ViewID = UNIQUE_VIEW_ID;
         SceneManager.sceneLoaded += OnSceneLoaded;
+        PhotonNetwork.NetworkingClient.AppId = PhotonNetwork.PhotonServerSettings.AppSettings.AppIdRealtime;
     }
 
     protected virtual void OnDestroy()
@@ -97,8 +101,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.OfflineMode = false;
         PhotonNetwork.ConnectToBestCloudServer();
-        if (onJoiningLobby != null)
-            onJoiningLobby.Invoke();
+        if (onConnectingToMaster != null)
+            onConnectingToMaster.Invoke();
     }
 
     public virtual void ConnectToRegion()
@@ -107,16 +111,16 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.OfflineMode = false;
         PhotonNetwork.ConnectToRegion(region);
-        if (onJoiningLobby != null)
-            onJoiningLobby.Invoke();
+        if (onConnectingToMaster != null)
+            onConnectingToMaster.Invoke();
     }
 
     public virtual void PlayOffline()
     {
         isConnectOffline = true;
         PhotonNetwork.AutomaticallySyncScene = true;
-        if (onJoinedLobby != null)
-            onJoinedLobby.Invoke();
+        if (onConnectingToMaster != null)
+            onConnectingToMaster.Invoke();
     }
 
     public void CreateRoom()
@@ -169,7 +173,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         this.roomName = roomName;
         if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
         {
-            var customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
+            Hashtable customProperties = new Hashtable();
             customProperties[CUSTOM_ROOM_ROOM_NAME] = roomName;
             PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
         }
@@ -190,10 +194,17 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         this.onlineScene = onlineScene;
         if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
         {
-            var customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
+            Hashtable customProperties = new Hashtable();
             customProperties[CUSTOM_ROOM_SCENE_NAME] = onlineScene.SceneName;
             PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
         }
+    }
+
+    public void JoinLobby()
+    {
+        PhotonNetwork.JoinLobby();
+        if (onJoiningLobby != null)
+            onJoiningLobby.Invoke();
     }
 
     public void JoinRoom(string roomName)
@@ -294,7 +305,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     {
         if (isLog) Debug.Log("OnCreatedRoom");
         // Set room information
-        var customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
+        Hashtable customProperties = new Hashtable();
         customProperties[CUSTOM_ROOM_ROOM_NAME] = roomName;
         customProperties[CUSTOM_ROOM_PLAYER_ID] = PhotonNetwork.LocalPlayer.UserId;
         customProperties[CUSTOM_ROOM_PLAYER_NAME] = PhotonNetwork.LocalPlayer.NickName;
@@ -330,7 +341,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             yield return null;
         }
         // Change room state to playing
-        var customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
+        Hashtable customProperties = new Hashtable();
         customProperties[CUSTOM_ROOM_STATE] = (byte)RoomState.Playing;
         PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
         // Setup start points for master client
@@ -349,7 +360,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             }
         }
         // Set player state to not ready
-        var customProperties = PhotonNetwork.LocalPlayer.CustomProperties;
+        Hashtable customProperties = new Hashtable();
         customProperties[CUSTOM_PLAYER_STATE] = (byte)PlayerState.NotReady;
         PhotonNetwork.LocalPlayer.SetCustomProperties(customProperties);
         if (onJoinedRoom != null)
@@ -367,8 +378,12 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         if (isLog) Debug.Log("OnConnectedToMaster");
+        if (onConnectedToMaster != null)
+            onConnectedToMaster.Invoke();
+        if (autoJoinLobby)
+            JoinLobby();
         if (isConnectOffline)
-            PhotonNetwork.JoinRandomRoom();
+            JoinRandomRoom();
     }
 
     /// <summary>
@@ -380,7 +395,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
-        var customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
+        Hashtable customProperties = new Hashtable();
         customProperties[CUSTOM_ROOM_PLAYER_ID] = newMasterClient.UserId;
         customProperties[CUSTOM_ROOM_PLAYER_NAME] = newMasterClient.NickName;
         PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
@@ -412,12 +427,18 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
         if (isLog) Debug.Log("OnPhotonCustomRoomPropertiesChanged");
+        foreach (var entry in propertiesThatChanged)
+        {
+            Debug.LogError("Room: " + entry.Key + " Value: " + entry.Value);
+        }
         if (onCustomRoomPropertiesChanged != null)
             onCustomRoomPropertiesChanged.Invoke(propertiesThatChanged);
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        if (isLog)
+            Debug.Log("OnSceneLoaded " + scene.name);
         StartCoroutine(OnSceneLoadedRoutine(scene, mode));
     }
 
@@ -428,6 +449,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             yield return null;
         if ((offlineScene.SceneName == onlineScene.SceneName || offlineScene.SceneName != scene.name) && PhotonNetwork.InRoom)
         {
+            Debug.LogError("--- Online scene: " + scene.name);
             // Send client ready to spawn player at master client
             OnOnlineSceneChanged();
             photonView.RPC("RpcPlayerSceneChanged", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.UserId);
@@ -442,7 +464,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        Hashtable customProperties = PhotonNetwork.LocalPlayer.CustomProperties;
+        Hashtable customProperties = new Hashtable();
         PlayerState state = PlayerState.NotReady;
         object stateObj;
         if (customProperties.TryGetValue(CUSTOM_PLAYER_STATE, out stateObj))
@@ -465,7 +487,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        Hashtable customProperties = PhotonNetwork.LocalPlayer.CustomProperties;
+        Hashtable customProperties = new Hashtable();
         customProperties[CUSTOM_PLAYER_STATE] = (byte)playerState;
         PhotonNetwork.LocalPlayer.SetCustomProperties(customProperties);
     }
