@@ -427,10 +427,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
         if (isLog) Debug.Log("OnPhotonCustomRoomPropertiesChanged");
-        foreach (var entry in propertiesThatChanged)
-        {
-            Debug.LogError("Room: " + entry.Key + " Value: " + entry.Value);
-        }
         if (onCustomRoomPropertiesChanged != null)
             onCustomRoomPropertiesChanged.Invoke(propertiesThatChanged);
     }
@@ -449,7 +445,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             yield return null;
         if ((offlineScene.SceneName == onlineScene.SceneName || offlineScene.SceneName != scene.name) && PhotonNetwork.InRoom)
         {
-            Debug.LogError("--- Online scene: " + scene.name);
             // Send client ready to spawn player at master client
             OnOnlineSceneChanged();
             photonView.RPC("RpcPlayerSceneChanged", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.UserId);
