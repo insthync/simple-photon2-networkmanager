@@ -232,13 +232,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void Disconnect()
     {
-        if (isConnectOffline)
-        {
-            if (onDisconnected != null)
-                onDisconnected.Invoke();
-        }
-        else
-            PhotonNetwork.Disconnect();
+        PhotonNetwork.Disconnect();
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> rooms)
@@ -381,10 +375,10 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         if (isLog) Debug.Log("OnConnectedToMaster");
         if (onConnectedToMaster != null)
             onConnectedToMaster.Invoke();
-        if (autoJoinLobby)
-            JoinLobby();
         if (isConnectOffline)
-            JoinRandomRoom();
+            PhotonNetwork.JoinRandomRoom();
+        else if (autoJoinLobby)
+            JoinLobby();
     }
 
     /// <summary>
