@@ -188,6 +188,11 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public void StartMatchMaking()
     {
+        StartMatchMaking(null);
+    }
+
+    public void StartMatchMaking(Hashtable filters)
+    {
         if (isMatchMaking)
         {
             if (isLog) Debug.Log("Cannot start match making, match making started");
@@ -201,9 +206,10 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         }
         startGameOnRoomCreated = false;
         isMatchMaking = true;
-        Hashtable customProperties = new Hashtable();
-        customProperties[CUSTOM_ROOM_MATCH_MAKE] = true;
-        PhotonNetwork.JoinRandomRoom(customProperties, 0);
+        if (filters == null)
+            filters = new Hashtable();
+        filters[CUSTOM_ROOM_MATCH_MAKE] = true;
+        PhotonNetwork.JoinRandomRoom(filters, 0);
         startMatchMakingTime = Time.unscaledTime;
         if (onMatchMakingStarted != null)
             onMatchMakingStarted.Invoke();
@@ -283,7 +289,14 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public void JoinRandomRoom()
     {
-        PhotonNetwork.JoinRandomRoom();
+        JoinRandomRoom(null);
+    }
+
+    public void JoinRandomRoom(Hashtable filter)
+    {
+        if (filter == null)
+            filter = new Hashtable();
+        PhotonNetwork.JoinRandomRoom(filter, 0);
         if (onJoiningRoom != null)
             onJoiningRoom.Invoke();
     }
