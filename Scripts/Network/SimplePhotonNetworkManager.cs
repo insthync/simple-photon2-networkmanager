@@ -308,7 +308,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             isMatchMaking = false;
             if (onMatchMakingStopped != null)
                 onMatchMakingStopped.Invoke();
-            return;
         }
         if (isConnectOffline)
             PhotonNetwork.Disconnect();
@@ -323,7 +322,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             isMatchMaking = false;
             if (onMatchMakingStopped != null)
                 onMatchMakingStopped.Invoke();
-            return;
         }
         PhotonNetwork.Disconnect();
     }
