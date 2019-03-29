@@ -221,7 +221,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         roomOptions.CustomRoomPropertiesForLobby = GetCustomRoomPropertiesForMatchMaking();
         roomOptions.MaxPlayers = maxConnections;
         roomOptions.PublishUserId = true;
-        roomOptions.IsVisible = false;
         PhotonNetwork.CreateRoom(string.Empty, roomOptions, null);
     }
 
@@ -514,7 +513,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         if (isLog) Debug.Log("OnPlayerEnteredRoom");
         if (onPlayerConnected != null)
             onPlayerConnected.Invoke(newPlayer);
-        if (isMatchMaking && PhotonNetwork.CurrentRoom.PlayerCount >= matchMakingConnections)
+        if (PhotonNetwork.IsMasterClient && isMatchMaking && PhotonNetwork.CurrentRoom.PlayerCount >= matchMakingConnections)
             StartGame();
     }
 
