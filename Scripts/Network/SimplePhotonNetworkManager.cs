@@ -131,6 +131,11 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public void CreateRoom()
     {
+        if (isMatchMaking)
+        {
+            if (isLog) Debug.Log("Cannot create room, match making started");
+            return;
+        }
         if (isConnectOffline)
         {
             PhotonNetwork.OfflineMode = true;
@@ -144,6 +149,11 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public void CreateWaitingRoom()
     {
+        if (isMatchMaking)
+        {
+            if (isLog) Debug.Log("Cannot create waiting room, match making started");
+            return;
+        }
         if (isConnectOffline)
         {
             PhotonNetwork.OfflineMode = true;
@@ -178,6 +188,11 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public void StartMatchMaking()
     {
+        if (isMatchMaking)
+        {
+            if (isLog) Debug.Log("Cannot start match making, match making started");
+            return;
+        }
         if (isConnectOffline)
         {
             PhotonNetwork.OfflineMode = true;
@@ -216,10 +231,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public void StopMatchMaking()
     {
         LeaveRoom();
-        isMatchMaking = false;
-        if (onMatchMakingStopped != null)
-            onMatchMakingStopped.Invoke();
     }
+
 
     public void SetRoomName(string roomName)
     {
@@ -277,6 +290,13 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void LeaveRoom()
     {
+        if (isMatchMaking)
+        {
+            isMatchMaking = false;
+            if (onMatchMakingStopped != null)
+                onMatchMakingStopped.Invoke();
+            return;
+        }
         if (isConnectOffline)
             PhotonNetwork.Disconnect();
         else
@@ -285,6 +305,13 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void Disconnect()
     {
+        if (isMatchMaking)
+        {
+            isMatchMaking = false;
+            if (onMatchMakingStopped != null)
+                onMatchMakingStopped.Invoke();
+            return;
+        }
         PhotonNetwork.Disconnect();
     }
 
