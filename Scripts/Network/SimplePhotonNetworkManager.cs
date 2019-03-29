@@ -428,6 +428,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             return;
         }
 
+        isMatchMaking = false;
+
         StartCoroutine(LoadOnlineScene());
     }
 
