@@ -393,6 +393,21 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public override void OnLeftRoom()
+    {
+        if (isLog) Debug.Log("OnLeftRoom");
+        if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
+            SceneManager.LoadScene(offlineScene.SceneName);
+        if (onLeftRoom != null)
+            onLeftRoom.Invoke();
+        if (isMatchMaking)
+        {
+            isMatchMaking = false;
+            if (onMatchMakingStopped != null)
+                onMatchMakingStopped.Invoke();
+        }
+    }
+
     public override void OnCreateRoomFailed(short code, string msg)
     {
         if (isLog) Debug.Log("OnCreateRoomFailed " + code + " " + msg);
@@ -681,21 +696,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         position = point.position;
         rotation = point.rotation;
         return true;
-    }
-
-    public override void OnLeftRoom()
-    {
-        if (isLog) Debug.Log("OnLeftRoom");
-        if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
-            SceneManager.LoadScene(offlineScene.SceneName);
-        if (onLeftRoom != null)
-            onLeftRoom.Invoke();
-        if (isMatchMaking)
-        {
-            isMatchMaking = false;
-            if (onMatchMakingStopped != null)
-                onMatchMakingStopped.Invoke();
-        }
     }
 
     public static RoomState GetRoomState()
