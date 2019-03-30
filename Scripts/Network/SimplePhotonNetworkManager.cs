@@ -92,6 +92,34 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
+    protected void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            if (PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
+            {
+                ChangeMasterClientifAvailble();
+                PhotonNetwork.SendAllOutgoingCommands();
+
+            }
+        }
+    }
+
+    public void ChangeMasterClientifAvailble()
+    {
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            return;
+        }
+
+        if (PhotonNetwork.CurrentRoom.PlayerCount <= 1)
+        {
+            return;
+        }
+
+        PhotonNetwork.SetMasterClient(PhotonNetwork.MasterClient.GetNext());
+    }
+
     public virtual void ConnectToMaster()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
