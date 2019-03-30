@@ -97,8 +97,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     {
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.ConnectToMaster(masterAddress, masterPort, PhotonNetwork.PhotonServerSettings.AppSettings.AppIdRealtime);
-        if (onJoiningLobby != null)
-            onJoiningLobby.Invoke();
+        if (onConnectingToMaster != null)
+            onConnectingToMaster.Invoke();
     }
 
     public virtual void ConnectToBestCloudServer()
