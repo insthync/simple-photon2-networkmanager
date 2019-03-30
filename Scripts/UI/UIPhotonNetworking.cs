@@ -63,6 +63,8 @@ public class UIPhotonNetworking : UIBase
     {
         SimplePhotonNetworkManager.onReceivedRoomListUpdate -= OnReceivedRoomListUpdateCallback;
         SimplePhotonNetworkManager.onJoinedLobby -= OnJoinedLobbyCallback;
+        SimplePhotonNetworkManager.onJoinedRoom -= OnJoinedRoomCallback;
+        SimplePhotonNetworkManager.onLeftRoom -= OnLeftRoomCallback;
         SimplePhotonNetworkManager.onDisconnected -= OnDisconnectedCallback;
     }
 
