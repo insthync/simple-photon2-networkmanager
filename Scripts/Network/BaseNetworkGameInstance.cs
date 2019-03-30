@@ -2,11 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class MapSelection
+{
+    public string mapName;
+    public SceneNameField scene;
+    public Sprite previewImage;
+    public BaseNetworkGameRule[] availableGameRules;
+}
+
 public abstract class BaseNetworkGameInstance : MonoBehaviour
 {
     public static BaseNetworkGameInstance Singleton { get; private set; }
-    public BaseNetworkGameRule[] gameRules;
+    public MapSelection[] maps;
     public static Dictionary<string, BaseNetworkGameRule> GameRules = new Dictionary<string, BaseNetworkGameRule>();
+    public static Dictionary<string, MapSelection> MapListBySceneNames = new Dictionary<string, MapSelection>();
     protected virtual void Awake()
     {
         if (Singleton != null)
@@ -16,10 +26,21 @@ public abstract class BaseNetworkGameInstance : MonoBehaviour
         }
         Singleton = this;
         DontDestroyOnLoad(gameObject);
+        SetupMaps();
+    }
+
+    public void SetupMaps()
+    {
+        MapListBySceneNames.Clear();
         GameRules.Clear();
-        foreach (var gameRule in gameRules)
+        foreach (var map in maps)
         {
-            GameRules[gameRule.name] = gameRule;
+            foreach (var gameRule in map.availableGameRules)
+            {
+                if (!GameRules.ContainsKey(gameRule.name))
+                    GameRules[gameRule.name] = gameRule;
+            }
+            MapListBySceneNames[map.scene.SceneName] = map;
         }
     }
 
