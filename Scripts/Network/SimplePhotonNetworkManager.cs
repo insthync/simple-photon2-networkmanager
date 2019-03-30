@@ -61,7 +61,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public byte maxConnections = 10;
     public byte matchMakingConnections = 2;
     public string roomName;
-    public bool autoJoinLobby;
     public SimplePhotonStartPoint[] StartPoints { get; protected set; }
     public bool isConnectOffline { get; protected set; }
     public bool isMatchMaking { get; protected set; }
@@ -125,8 +124,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     {
         isConnectOffline = true;
         PhotonNetwork.AutomaticallySyncScene = true;
-        if (onConnectingToMaster != null)
-            onConnectingToMaster.Invoke();
+        if (onJoinedLobby != null)
+            onJoinedLobby.Invoke();
     }
 
     public void CreateRoom()
@@ -272,13 +271,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void JoinLobby()
-    {
-        PhotonNetwork.JoinLobby();
-        if (onJoiningLobby != null)
-            onJoiningLobby.Invoke();
-    }
-
     public void JoinRoom(string roomName)
     {
         PhotonNetwork.JoinRoom(roomName);
@@ -321,6 +313,11 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             isMatchMaking = false;
             if (onMatchMakingStopped != null)
                 onMatchMakingStopped.Invoke();
+        }
+        if (isConnectOffline && !PhotonNetwork.OfflineMode)
+        {
+            if (onDisconnected != null)
+                onDisconnected.Invoke();
         }
         PhotonNetwork.Disconnect();
     }
@@ -489,8 +486,12 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             onConnectedToMaster.Invoke();
         if (isConnectOffline)
             PhotonNetwork.JoinRandomRoom();
-        else if (autoJoinLobby)
-            JoinLobby();
+        else
+        {
+            PhotonNetwork.JoinLobby();
+            if (onJoiningLobby != null)
+                onJoiningLobby.Invoke();
+        }
     }
 
     /// <summary>
