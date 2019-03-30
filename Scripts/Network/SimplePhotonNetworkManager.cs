@@ -60,6 +60,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public int sendRate = 20;
     public byte maxConnections = 10;
     public byte matchMakingConnections = 2;
+    public float maxMatchMakingTime = 60f;
     public string roomName;
     public SimplePhotonStartPoint[] StartPoints { get; protected set; }
     public bool isConnectOffline { get; protected set; }
@@ -85,6 +86,14 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         view.ViewID = UNIQUE_VIEW_ID;
         SceneManager.sceneLoaded += OnSceneLoaded;
         PhotonNetwork.NetworkingClient.AppId = PhotonNetwork.PhotonServerSettings.AppSettings.AppIdRealtime;
+    }
+
+    protected virtual void Update()
+    {
+        if (isMatchMaking && maxMatchMakingTime > 0 && Time.unscaledTime - startMatchMakingTime >= maxMatchMakingTime)
+        {
+            StartGame();
+        }
     }
 
     protected virtual void OnDestroy()
@@ -322,12 +331,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void LeaveRoom()
     {
-        if (isMatchMaking)
-        {
-            isMatchMaking = false;
-            if (onMatchMakingStopped != null)
-                onMatchMakingStopped.Invoke();
-        }
         if (isConnectOffline)
             PhotonNetwork.Disconnect();
         else
@@ -336,12 +339,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void Disconnect()
     {
-        if (isMatchMaking)
-        {
-            isMatchMaking = false;
-            if (onMatchMakingStopped != null)
-                onMatchMakingStopped.Invoke();
-        }
         if (isConnectOffline && !PhotonNetwork.OfflineMode)
         {
             if (onDisconnected != null)
@@ -387,6 +384,12 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
                 if (onConnectionError != null)
                     onConnectionError.Invoke(cause);
                 break;
+        }
+        if (isMatchMaking)
+        {
+            isMatchMaking = false;
+            if (onMatchMakingStopped != null)
+                onMatchMakingStopped.Invoke();
         }
     }
 
@@ -687,6 +690,12 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             SceneManager.LoadScene(offlineScene.SceneName);
         if (onLeftRoom != null)
             onLeftRoom.Invoke();
+        if (isMatchMaking)
+        {
+            isMatchMaking = false;
+            if (onMatchMakingStopped != null)
+                onMatchMakingStopped.Invoke();
+        }
     }
 
     public static RoomState GetRoomState()
