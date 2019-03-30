@@ -89,7 +89,7 @@ public class UIPhotonWaitingRoom : UIBase
         if (textPlayerName != null)
             textPlayerName.text = playerName;
         if (textSceneName != null)
-            textSceneName.text = sceneName;
+            textSceneName.text = BaseNetworkGameInstance.GetMapNameByScene(sceneName);
         if (textPlayerCount != null)
             textPlayerCount.text = room.PlayerCount + "/" + room.MaxPlayers;
         if (textRoomState != null)

@@ -27,4 +27,11 @@ public abstract class BaseNetworkGameInstance : MonoBehaviour
     {
         // The photon version not supports arguments
     }
+
+    public static string GetMapNameByScene(string sceneName)
+    {
+        if (MapListBySceneNames.ContainsKey(sceneName))
+            return MapListBySceneNames[sceneName].mapName;
+        return sceneName;
+    }
 }
