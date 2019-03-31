@@ -219,6 +219,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             CUSTOM_ROOM_PLAYER_ID,
             CUSTOM_ROOM_PLAYER_NAME,
             CUSTOM_ROOM_SCENE_NAME,
+            CUSTOM_ROOM_MATCH_MAKE,
             CUSTOM_ROOM_STATE
         };
     }
@@ -256,19 +257,10 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     private void SetupAndCreateMatchMakingRoom()
     {
         var roomOptions = new RoomOptions();
-        roomOptions.CustomRoomPropertiesForLobby = GetCustomRoomPropertiesForMatchMaking();
+        roomOptions.CustomRoomPropertiesForLobby = GetCustomRoomPropertiesForLobby();
         roomOptions.MaxPlayers = maxConnections;
         roomOptions.PublishUserId = true;
         PhotonNetwork.CreateRoom(string.Empty, roomOptions, null);
-    }
-
-    protected virtual string[] GetCustomRoomPropertiesForMatchMaking()
-    {
-        return new string[]
-        {
-            CUSTOM_ROOM_SCENE_NAME,
-            CUSTOM_ROOM_MATCH_MAKE
-        };
     }
 
     public void StopMatchMaking()
@@ -335,6 +327,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     {
         if (filter == null)
             filter = new Hashtable();
+        filter[CUSTOM_ROOM_MATCH_MAKE] = false;
         PhotonNetwork.JoinRandomRoom(filter, 0);
         if (onJoiningRoom != null)
             onJoiningRoom.Invoke();
@@ -364,16 +357,20 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         foreach (var room in rooms)
         {
             var customProperties = room.CustomProperties;
-            var discoveryData = new NetworkDiscoveryData();
-            discoveryData.name = room.Name;
-            discoveryData.roomName = (string)customProperties[CUSTOM_ROOM_ROOM_NAME];
-            discoveryData.playerId = (string)customProperties[CUSTOM_ROOM_PLAYER_ID];
-            discoveryData.playerName = (string)customProperties[CUSTOM_ROOM_PLAYER_NAME];
-            discoveryData.sceneName = (string)customProperties[CUSTOM_ROOM_SCENE_NAME];
-            discoveryData.state = (byte)customProperties[CUSTOM_ROOM_STATE];
-            discoveryData.numPlayers = room.PlayerCount;
-            discoveryData.maxPlayers = room.MaxPlayers;
-            foundRooms.Add(discoveryData);
+            var isMatchMaking = (bool)customProperties[CUSTOM_ROOM_MATCH_MAKE];
+            if (!isMatchMaking)
+            {
+                var discoveryData = new NetworkDiscoveryData();
+                discoveryData.name = room.Name;
+                discoveryData.roomName = (string)customProperties[CUSTOM_ROOM_ROOM_NAME];
+                discoveryData.playerId = (string)customProperties[CUSTOM_ROOM_PLAYER_ID];
+                discoveryData.playerName = (string)customProperties[CUSTOM_ROOM_PLAYER_NAME];
+                discoveryData.sceneName = (string)customProperties[CUSTOM_ROOM_SCENE_NAME];
+                discoveryData.state = (byte)customProperties[CUSTOM_ROOM_STATE];
+                discoveryData.numPlayers = room.PlayerCount;
+                discoveryData.maxPlayers = room.MaxPlayers;
+                foundRooms.Add(discoveryData);
+            }
         }
         if (onReceivedRoomListUpdate != null)
             onReceivedRoomListUpdate.Invoke(foundRooms);
@@ -447,6 +444,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         customProperties[CUSTOM_ROOM_PLAYER_ID] = PhotonNetwork.LocalPlayer.UserId;
         customProperties[CUSTOM_ROOM_PLAYER_NAME] = PhotonNetwork.LocalPlayer.NickName;
         customProperties[CUSTOM_ROOM_SCENE_NAME] = onlineScene.SceneName;
+        customProperties[CUSTOM_ROOM_MATCH_MAKE] = false;
         customProperties[CUSTOM_ROOM_STATE] = (byte) RoomState.Waiting;
         PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
         if (startGameOnRoomCreated)
