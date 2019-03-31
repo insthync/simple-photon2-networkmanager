@@ -465,10 +465,19 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        if (isMatchMaking && PhotonNetwork.CurrentRoom.PlayerCount < matchMakingConnections)
+        if (isMatchMaking)
         {
-            Debug.LogError("Player is not enough to start game");
-            return;
+            if (maxMatchMakingTime <= 0 || Time.unscaledTime - startMatchMakingTime < maxMatchMakingTime)
+            {
+                Debug.LogError("It is not time to start game");
+                return;
+            }
+
+            if (PhotonNetwork.CurrentRoom.PlayerCount < matchMakingConnections)
+            {
+                Debug.LogError("Player is not enough to start game");
+                return;
+            }
         }
 
         isMatchMaking = false;
@@ -601,6 +610,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             yield return null;
         if ((offlineScene.SceneName == onlineScene.SceneName || offlineScene.SceneName != scene.name) && PhotonNetwork.InRoom)
         {
+            isMatchMaking = false;
             // Send client ready to spawn player at master client
             OnOnlineSceneChanged();
             photonView.RPC("RpcPlayerSceneChanged", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.UserId);
