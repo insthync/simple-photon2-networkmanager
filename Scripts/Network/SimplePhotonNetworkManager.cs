@@ -471,13 +471,11 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         {
             if (maxMatchMakingTime <= 0 || Time.unscaledTime - startMatchMakingTime < maxMatchMakingTime)
             {
-                Debug.LogError("It is not time to start game");
-                return;
-            }
-            else if (PhotonNetwork.CurrentRoom.PlayerCount < matchMakingConnections)
-            {
-                Debug.LogError("Player is not enough to start game");
-                return;
+                if (PhotonNetwork.CurrentRoom.PlayerCount < matchMakingConnections)
+                {
+                    Debug.LogError("Player is not enough to start game");
+                    return;
+                }
             }
         }
 
