@@ -67,6 +67,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public bool isMatchMaking { get; protected set; }
     public float startMatchMakingTime { get; protected set; }
     private bool startGameOnRoomCreated;
+    private Hashtable cacheMatchMakingFilters;
 
     protected virtual void Awake()
     {
@@ -246,6 +247,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             filters = new Hashtable();
         filters[CUSTOM_ROOM_MATCH_MAKE] = true;
         PhotonNetwork.JoinRandomRoom(filters, 0);
+        cacheMatchMakingFilters = filters;
         startMatchMakingTime = Time.unscaledTime;
         if (onMatchMakingStarted != null)
             onMatchMakingStarted.Invoke();
@@ -274,6 +276,15 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         LeaveRoom();
     }
 
+    public void OnStopMatchMaking()
+    {
+        if (isMatchMaking)
+        {
+            isMatchMaking = false;
+            if (onMatchMakingStopped != null)
+                onMatchMakingStopped.Invoke();
+        }
+    }
 
     public void SetRoomName(string roomName)
     {
@@ -385,12 +396,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
                     onConnectionError.Invoke(cause);
                 break;
         }
-        if (isMatchMaking)
-        {
-            isMatchMaking = false;
-            if (onMatchMakingStopped != null)
-                onMatchMakingStopped.Invoke();
-        }
+        OnStopMatchMaking();
     }
 
     public override void OnLeftRoom()
@@ -400,12 +406,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             SceneManager.LoadScene(offlineScene.SceneName);
         if (onLeftRoom != null)
             onLeftRoom.Invoke();
-        if (isMatchMaking)
-        {
-            isMatchMaking = false;
-            if (onMatchMakingStopped != null)
-                onMatchMakingStopped.Invoke();
-        }
+        OnStopMatchMaking();
     }
 
     public override void OnCreateRoomFailed(short code, string msg)
@@ -413,6 +414,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         if (isLog) Debug.Log("OnCreateRoomFailed " + code + " " + msg);
         if (onRoomConnectError != null)
             onRoomConnectError.Invoke(code, msg);
+        OnStopMatchMaking();
     }
 
     public override void OnJoinRandomFailed(short code, string msg)
@@ -472,8 +474,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
                 Debug.LogError("It is not time to start game");
                 return;
             }
-
-            if (PhotonNetwork.CurrentRoom.PlayerCount < matchMakingConnections)
+            else if (PhotonNetwork.CurrentRoom.PlayerCount < matchMakingConnections)
             {
                 Debug.LogError("Player is not enough to start game");
                 return;
@@ -513,9 +514,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             if (isMatchMaking)
             {
                 // Set match making state to true for join random filter later
-                Hashtable roomCustomProperties = new Hashtable();
-                roomCustomProperties[CUSTOM_ROOM_MATCH_MAKE] = true;
-                PhotonNetwork.CurrentRoom.SetCustomProperties(roomCustomProperties);
+                PhotonNetwork.CurrentRoom.SetCustomProperties(cacheMatchMakingFilters);
+
             }
         }
         // Set player state to not ready
