@@ -79,8 +79,9 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         base.Disconnect();
     }
 
-    protected virtual void Update()
+    protected override void Update()
     {
+        base.Update();
         if (PhotonNetwork.IsMasterClient)
             ServerUpdate();
         if (!PhotonNetwork.IsMasterClient && PhotonNetwork.InRoom)
@@ -110,21 +111,27 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         foreach (var room in rooms)
         {
             var customProperties = room.CustomProperties;
-            var discoveryData = new NetworkDiscoveryData();
-            discoveryData.name = room.Name;
-            discoveryData.roomName = (string)customProperties[CUSTOM_ROOM_ROOM_NAME];
-            discoveryData.playerId = (string)customProperties[CUSTOM_ROOM_PLAYER_ID];
-            discoveryData.playerName = (string)customProperties[CUSTOM_ROOM_PLAYER_NAME];
-            discoveryData.sceneName = (string)customProperties[CUSTOM_ROOM_SCENE_NAME];
-            discoveryData.state = (byte)customProperties[CUSTOM_ROOM_STATE];
-            discoveryData.numPlayers = room.PlayerCount;
-            discoveryData.maxPlayers = room.MaxPlayers;
-            discoveryData.gameRule = (string)customProperties[CUSTOM_ROOM_GAME_RULE];
-            discoveryData.botCount = (int)customProperties[CUSTOM_ROOM_GAME_RULE_BOT_COUNT];
-            discoveryData.matchTime = (int)customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_TIME];
-            discoveryData.matchKill = (int)customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_KILL];
-            discoveryData.matchScore = (int)customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_SCORE];
-            foundRooms.Add(discoveryData);
+            if (customProperties.Count == 0)
+                continue;
+            var isMatchMaking = (bool)customProperties[CUSTOM_ROOM_MATCH_MAKE];
+            if (!isMatchMaking)
+            {
+                var discoveryData = new NetworkDiscoveryData();
+                discoveryData.name = room.Name;
+                discoveryData.roomName = (string)customProperties[CUSTOM_ROOM_ROOM_NAME];
+                discoveryData.playerId = (string)customProperties[CUSTOM_ROOM_PLAYER_ID];
+                discoveryData.playerName = (string)customProperties[CUSTOM_ROOM_PLAYER_NAME];
+                discoveryData.sceneName = (string)customProperties[CUSTOM_ROOM_SCENE_NAME];
+                discoveryData.state = (byte)customProperties[CUSTOM_ROOM_STATE];
+                discoveryData.numPlayers = room.PlayerCount;
+                discoveryData.maxPlayers = room.MaxPlayers;
+                discoveryData.gameRule = (string)customProperties[CUSTOM_ROOM_GAME_RULE];
+                discoveryData.botCount = (int)customProperties[CUSTOM_ROOM_GAME_RULE_BOT_COUNT];
+                discoveryData.matchTime = (int)customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_TIME];
+                discoveryData.matchKill = (int)customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_KILL];
+                discoveryData.matchScore = (int)customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_SCORE];
+                foundRooms.Add(discoveryData);
+            }
         }
         if (onReceivedRoomListUpdate != null)
             onReceivedRoomListUpdate.Invoke(foundRooms);
