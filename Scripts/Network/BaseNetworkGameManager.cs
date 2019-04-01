@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 [RequireComponent(typeof(PunTeams))]
 public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
@@ -281,7 +282,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         this.gameRule = gameRule;
         if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
         {
-            var customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
+            Hashtable customProperties = new Hashtable();
             customProperties[CUSTOM_ROOM_GAME_RULE] = gameRule == null ? "" : gameRule.name;
             customProperties[CUSTOM_ROOM_GAME_RULE_BOT_COUNT] = gameRule == null ? 0 : gameRule.botCount;
             customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_TIME] = gameRule == null ? 0 : gameRule.matchTime;
@@ -300,7 +301,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     {
         // Reset last game/match data
         ResetGame();
-        var customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
+        Hashtable customProperties = new Hashtable();
         customProperties[CUSTOM_ROOM_GAME_RULE] = gameRule == null ? "" : gameRule.name;
         customProperties[CUSTOM_ROOM_GAME_RULE_BOT_COUNT] = gameRule == null ? 0 : gameRule.botCount;
         customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_TIME] = gameRule == null ? 0 : gameRule.matchTime;
