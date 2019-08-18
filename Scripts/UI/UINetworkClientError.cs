@@ -1,12 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Photon.Realtime;
 
 public class UINetworkClientError : MonoBehaviour
 {
+    [System.Serializable]
+    public class ErrorEvent : UnityEvent<string> { }
+
     public static UINetworkClientError Singleton { get; private set; }
     public UIMessageDialog messageDialog;
+    public ErrorEvent onConnectionError;
+    public ErrorEvent onRoomConnectError;
 
     private void Awake()
     {
@@ -27,6 +33,7 @@ public class UINetworkClientError : MonoBehaviour
             return;
 
         messageDialog.Show(error.ToString());
+        onConnectionError.Invoke(error.ToString());
     }
 
     public void OnRoomConnectError(short code, string msg)
@@ -34,6 +41,7 @@ public class UINetworkClientError : MonoBehaviour
         if (messageDialog == null)
             return;
 
-        messageDialog.Show(code + "\n(" + msg + ")");
+        messageDialog.Show(msg);
+        onRoomConnectError.Invoke(msg);
     }
 }
