@@ -13,8 +13,10 @@ public class UINetworkLoading : MonoBehaviour
     public GameObject connectingObject;
     public GameObject joiningLobbyObject;
     public GameObject joiningRoomObject;
+
     public UnityEvent onConnectingToMaster;
     public UnityEvent onConnectedToMaster;
+    public UnityEvent onDisconnected;
     public UnityEvent onJoiningLobby;
     public UnityEvent onJoinedLobby;
     public UnityEvent onJoiningRoom;
@@ -33,6 +35,7 @@ public class UINetworkLoading : MonoBehaviour
         Singleton = this;
         SimplePhotonNetworkManager.onConnectingToMaster += OnConnectingToMaster;
         SimplePhotonNetworkManager.onConnectedToMaster += OnConnectedToMaster;
+        SimplePhotonNetworkManager.onDisconnected += OnDisconnected;
         SimplePhotonNetworkManager.onJoiningLobby += OnJoiningLobby;
         SimplePhotonNetworkManager.onJoiningRoom += OnJoiningRoom;
         SimplePhotonNetworkManager.onJoinedLobby += OnJoinedLobby;
@@ -53,6 +56,20 @@ public class UINetworkLoading : MonoBehaviour
         if (connectingObject != null)
             connectingObject.SetActive(false);
         onConnectedToMaster.Invoke();
+    }
+
+    public void OnDisconnected()
+    {
+        if (connectingObject != null)
+            connectingObject.SetActive(false);
+
+        if (joiningLobbyObject != null)
+            joiningLobbyObject.SetActive(false);
+
+        if (joiningRoomObject != null)
+            joiningRoomObject.SetActive(false);
+
+        onDisconnected.Invoke();
     }
 
     public void OnJoiningLobby()

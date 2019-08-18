@@ -7,11 +7,13 @@ using Photon.Realtime;
 
 public class UIPhotonStats : MonoBehaviour
 {
+    public string formatConnectedRegion = "Connected to {0}";
     public string formatPing = "{0} ms";
     public string formatCountOfPlayers = "<color=green>ONLINE :</color> {0}";
     public string formatCountOfPlayersInRoom = "<color=green>ONLINE :</color> {0}";
     public string formatCountOfPlayersOnMaster = "<color=green>ONLINE :</color> {0}";
     public string formatCountOfRooms = "<color=green>ROOM :</color> {0}";
+    public Text textConnectedRegion;
     public Text textPing;
     public Text textCountOfPlayers;
     public Text textCountOfPlayersInRoom;
@@ -20,6 +22,9 @@ public class UIPhotonStats : MonoBehaviour
 
     private void Update()
     {
+        if (textConnectedRegion != null)
+            textConnectedRegion.text = string.Format(formatConnectedRegion, PhotonNetwork.CloudRegion);
+
         if (textPing != null)
             textPing.text = string.Format(formatPing, PhotonNetwork.GetPing().ToString("N0"));
 
