@@ -70,6 +70,9 @@ public class UIPhotonNetworking : UIBase
 
     private void OnReceivedRoomListUpdateCallback(List<NetworkDiscoveryData> discoveryData)
     {
+        if (entryPrefab == null || gameListContainer == null)
+            return;
+
         for (var i = gameListContainer.childCount - 1; i >= 0; --i)
         {
             var child = gameListContainer.GetChild(i);
