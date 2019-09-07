@@ -6,11 +6,23 @@ using UnityEngine.UI;
 public class UISelectRegion : MonoBehaviour
 {
     public string[] regions;
-    public SimplePhotonNetworkManager networkManager;
-    public Dropdown dropdown;
+    public Text textSelectedRegion;
+    private int selectedRegion;
+
+    private void Update()
+    {
+        if (textSelectedRegion != null)
+            textSelectedRegion.text = regions[selectedRegion];
+    }
 
     public void OnSelectRegion(int index)
     {
-        networkManager.region = regions[index];
+        selectedRegion = index;
+    }
+
+    public void OnClickConnectToRegion()
+    {
+        SimplePhotonNetworkManager.Singleton.region = regions[selectedRegion];
+        SimplePhotonNetworkManager.Singleton.ConnectToRegion();
     }
 }
