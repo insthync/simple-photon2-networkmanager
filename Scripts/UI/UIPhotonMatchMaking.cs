@@ -32,5 +32,15 @@ public class UIPhotonMatchMaking : UIBase
     {
         TimeSpan t = TimeSpan.FromSeconds(Time.unscaledTime - SimplePhotonNetworkManager.Singleton.startMatchMakingTime);
         return string.Format(formatMatchMakingCount, string.Format("{0:D2}:{1:D2}", t.Minutes, t.Seconds));
-}
+    }
+
+    public void OnClickStartMatchMaking()
+    {
+        SimplePhotonNetworkManager.Singleton.StartMatchMaking();
+    }
+
+    public void OnClickStopMatchMaking()
+    {
+        SimplePhotonNetworkManager.Singleton.StopMatchMaking();
+    }
 }
