@@ -32,9 +32,9 @@ public class UINetworkGameScoreEntry : MonoBehaviour
         if (textKillCount != null)
             textKillCount.text = ranking.killCount.ToString("N0");
         if (textAssistCount != null)
-            textAssistCount.text = ranking.killCount.ToString("N0");
+            textAssistCount.text = ranking.assistCount.ToString("N0");
         if (textDieCount != null)
-            textDieCount.text = ranking.killCount.ToString("N0");
+            textDieCount.text = ranking.dieCount.ToString("N0");
         if (textTeam != null)
         {
             switch (ranking.team)
