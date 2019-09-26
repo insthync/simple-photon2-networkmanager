@@ -386,18 +386,17 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnDisconnected(DisconnectCause cause)
     {
+        if (isQuitting)
+            return;
         if (isLog) Debug.Log("OnDisconnected " + cause.ToString());
         switch (cause)
         {
             case DisconnectCause.None:
             case DisconnectCause.DisconnectByClientLogic:
-                if (!isQuitting)
-                {
-                    if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
-                        SceneManager.LoadScene(offlineScene.SceneName);
-                    if (onDisconnected != null)
-                        onDisconnected.Invoke();
-                }
+                if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
+                    SceneManager.LoadScene(offlineScene.SceneName);
+                if (onDisconnected != null)
+                    onDisconnected.Invoke();
                 break;
             default:
                 if (onConnectionError != null)
@@ -409,14 +408,13 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnLeftRoom()
     {
+        if (isQuitting)
+            return;
         if (isLog) Debug.Log("OnLeftRoom");
-        if (!isQuitting)
-        {
-            if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
-                SceneManager.LoadScene(offlineScene.SceneName);
-            if (onLeftRoom != null)
-                onLeftRoom.Invoke();
-        }
+        if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
+            SceneManager.LoadScene(offlineScene.SceneName);
+        if (onLeftRoom != null)
+            onLeftRoom.Invoke();
         OnStopMatchMaking();
     }
 
