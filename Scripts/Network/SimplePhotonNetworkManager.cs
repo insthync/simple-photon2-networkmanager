@@ -68,6 +68,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public float startMatchMakingTime { get; protected set; }
     private bool startGameOnRoomCreated;
     private Hashtable cacheMatchMakingFilters;
+    protected bool isQuitting;
 
     protected virtual void Awake()
     {
@@ -378,6 +379,11 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             onReceivedRoomListUpdate.Invoke(foundRooms);
     }
 
+    protected void OnApplicationQuit()
+    {
+        isQuitting = true;
+    }
+
     public override void OnDisconnected(DisconnectCause cause)
     {
         if (isLog) Debug.Log("OnDisconnected " + cause.ToString());
@@ -385,10 +391,13 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         {
             case DisconnectCause.None:
             case DisconnectCause.DisconnectByClientLogic:
-                if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
-                    SceneManager.LoadScene(offlineScene.SceneName);
-                if (onDisconnected != null)
-                    onDisconnected.Invoke();
+                if (!isQuitting)
+                {
+                    if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
+                        SceneManager.LoadScene(offlineScene.SceneName);
+                    if (onDisconnected != null)
+                        onDisconnected.Invoke();
+                }
                 break;
             default:
                 if (onConnectionError != null)
@@ -401,10 +410,13 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public override void OnLeftRoom()
     {
         if (isLog) Debug.Log("OnLeftRoom");
-        if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
-            SceneManager.LoadScene(offlineScene.SceneName);
-        if (onLeftRoom != null)
-            onLeftRoom.Invoke();
+        if (!isQuitting)
+        {
+            if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
+                SceneManager.LoadScene(offlineScene.SceneName);
+            if (onLeftRoom != null)
+                onLeftRoom.Invoke();
+        }
         OnStopMatchMaking();
     }
 
