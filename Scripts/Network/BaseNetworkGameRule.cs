@@ -73,56 +73,114 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
     }
 
+    private float _matchTimeCountdown = 0f;
     public float MatchTimeCountdown
     {
-        get { try { return (float)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeCountdownKey]; } catch { } return 0f; }
-        protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeCountdownKey, value } }); }
+        get
+        {
+            try { return (float)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeCountdownKey]; } catch { }
+            return _matchTimeCountdown;
+        }
+        protected set
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeCountdownKey, value } });
+                _matchTimeCountdown = value;
+            }
+        }
     }
+
+    private bool _isBotAdded = false;
     public bool IsBotAdded
     {
-        get { try { return (bool)PhotonNetwork.CurrentRoom.CustomProperties[BotAddedKey]; } catch { } return false; }
-        protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { BotAddedKey, value } }); }
+        get
+        {
+            try { return (bool)PhotonNetwork.CurrentRoom.CustomProperties[BotAddedKey]; } catch { }
+            return _isBotAdded;
+        }
+        protected set
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { BotAddedKey, value } });
+                _isBotAdded = value;
+            }
+        }
     }
+
+    private bool _isMatchEnded = false;
     public bool IsMatchEnded
     {
-        get { try { return (bool)PhotonNetwork.CurrentRoom.CustomProperties[IsMatchEndedKey]; } catch { } return false; }
-        protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { IsMatchEndedKey, value } }); }
+        get
+        {
+            try { return (bool)PhotonNetwork.CurrentRoom.CustomProperties[IsMatchEndedKey]; } catch { }
+            return _isMatchEnded;
+        }
+        protected set
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { IsMatchEndedKey, value } });
+                _isMatchEnded = value;
+            }
+        }
     }
+
+    private int _botCount = 0;
     public int BotCount
     {
-        get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[BotCountKey]; } catch { } return 0; }
-        protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { BotCountKey, value } }); }
+        get
+        {
+            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[BotCountKey]; } catch { }
+            return _botCount;
+        }
+        protected set
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { BotCountKey, value } });
+                _botCount = value;
+            }
+        }
     }
+
     public int MatchTime
     {
         get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeKey]; } catch { } return 0; }
         protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeKey, value } }); }
     }
+
     public int MatchKill
     {
         get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchKillKey]; } catch { } return 0; }
         protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchKillKey, value } }); }
     }
+
     public int MatchScore
     {
         get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchScoreKey]; } catch { } return 0; }
         protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchScoreKey, value } }); }
     }
+
     public int TeamScoreA
     {
         get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamScoreAKey]; } catch { } return 0; }
         protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreAKey, value } }); }
     }
+
     public int TeamScoreB
     {
         get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamScoreBKey]; } catch { } return 0; }
         protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreBKey, value } }); }
     }
+
     public int TeamKillA
     {
         get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamKillAKey]; } catch { } return 0; }
         protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamKillAKey, value } }); }
     }
+
     public int TeamKillB
     {
         get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamKillBKey]; } catch { } return 0; }
@@ -211,7 +269,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
 
     public virtual void OnUpdate()
     {
-        if (!IsBotAdded)
+        if (!_isBotAdded)
         {
             AddBots();
             IsBotAdded = true;
