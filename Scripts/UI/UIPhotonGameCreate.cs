@@ -10,6 +10,7 @@ public class UIPhotonGameCreate : UIBase
 {
     public string defaultRoomName = "Let's play together !!";
     public byte maxPlayerCustomizable = 32;
+    public bool maxPlayerMustBeEvenNumber;
     public InputField inputRoomName;
     public InputField inputMaxPlayer;
     [Header("Match Bot Count")]
@@ -97,10 +98,16 @@ public class UIPhotonGameCreate : UIBase
         byte maxPlayer = maxPlayerCustomizable;
         if (!byte.TryParse(maxPlayerString, out maxPlayer) || maxPlayer > maxPlayerCustomizable)
             maxPlayer = maxPlayerCustomizable;
+        // Max player must be at least 1
+        if (maxPlayer == 0)
+            maxPlayer = 1;
         // Force max player to be even number
-        byte evenAmount = (byte)((int)maxPlayer / 2 * 2);
-        if (maxPlayer != evenAmount)
-            maxPlayer = evenAmount;
+        if (maxPlayerMustBeEvenNumber)
+        {
+            byte evenAmount = (byte)((int)maxPlayer / 2 * 2);
+            if (maxPlayer != evenAmount)
+                maxPlayer = evenAmount;
+        }
         networkGameManager.SetMaxConnections(maxPlayer);
 
         // Set game rule
@@ -207,17 +214,20 @@ public class UIPhotonGameCreate : UIBase
             return;
         byte maxPlayer = maxPlayerCustomizable;
         if (!byte.TryParse(value, out maxPlayer) || maxPlayer > maxPlayerCustomizable)
-        {
             maxPlayer = maxPlayerCustomizable;
-            inputMaxPlayer.text = maxPlayer.ToString();
-        }
+        // Max player must be at least 1
+        if (maxPlayer == 0)
+            maxPlayer = 1;
         // Force max player to be even number
-        byte evenAmount = (byte)((int)maxPlayer / 2 * 2);
-        if (maxPlayer != evenAmount)
+        if (maxPlayerMustBeEvenNumber)
         {
-            maxPlayer = evenAmount;
-            inputMaxPlayer.text = maxPlayer.ToString();
+            byte evenAmount = (byte)((int)maxPlayer / 2 * 2);
+            if (maxPlayer != evenAmount)
+            {
+                maxPlayer = evenAmount;
+            }
         }
+        inputMaxPlayer.text = maxPlayer.ToString();
     }
 
     public void OnBotCountChanged(string value)
