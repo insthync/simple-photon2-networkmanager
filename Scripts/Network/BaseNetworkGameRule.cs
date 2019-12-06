@@ -78,7 +78,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (float)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeCountdownKey]; } catch { }
+            try { return _matchTimeCountdown = (float)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeCountdownKey]; } catch { }
             return _matchTimeCountdown;
         }
         protected set
@@ -96,7 +96,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (bool)PhotonNetwork.CurrentRoom.CustomProperties[BotAddedKey]; } catch { }
+            try { return _isBotAdded = (bool)PhotonNetwork.CurrentRoom.CustomProperties[BotAddedKey]; } catch { }
             return _isBotAdded;
         }
         protected set
@@ -114,7 +114,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (bool)PhotonNetwork.CurrentRoom.CustomProperties[IsMatchEndedKey]; } catch { }
+            try { return _isMatchEnded = (bool)PhotonNetwork.CurrentRoom.CustomProperties[IsMatchEndedKey]; } catch { }
             return _isMatchEnded;
         }
         protected set
@@ -132,7 +132,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[BotCountKey]; } catch { }
+            try { return _botCount = (int)PhotonNetwork.CurrentRoom.CustomProperties[BotCountKey]; } catch { }
             return _botCount;
         }
         protected set
