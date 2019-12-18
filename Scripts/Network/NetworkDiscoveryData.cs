@@ -3,6 +3,7 @@ public class NetworkDiscoveryData
 {
     public string name;
     public string roomName;
+    public string roomPassword;
     public string playerId;
     public string playerName;
     public string sceneName;

@@ -94,6 +94,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         return new string[]
         {
             CUSTOM_ROOM_ROOM_NAME,
+            CUSTOM_ROOM_ROOM_PASSWORD,
             CUSTOM_ROOM_PLAYER_ID,
             CUSTOM_ROOM_PLAYER_NAME,
             CUSTOM_ROOM_SCENE_NAME,
@@ -121,6 +122,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                 var discoveryData = new NetworkDiscoveryData();
                 discoveryData.name = room.Name;
                 discoveryData.roomName = (string)customProperties[CUSTOM_ROOM_ROOM_NAME];
+                discoveryData.roomPassword = (string)customProperties[CUSTOM_ROOM_ROOM_PASSWORD];
                 discoveryData.playerId = (string)customProperties[CUSTOM_ROOM_PLAYER_ID];
                 discoveryData.playerName = (string)customProperties[CUSTOM_ROOM_PLAYER_NAME];
                 discoveryData.sceneName = (string)customProperties[CUSTOM_ROOM_SCENE_NAME];
