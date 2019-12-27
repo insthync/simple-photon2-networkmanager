@@ -269,7 +269,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
 
     public virtual void OnUpdate()
     {
-        if (!_isBotAdded)
+        if (!IsBotAdded)
         {
             AddBots();
             IsBotAdded = true;
