@@ -7,7 +7,6 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 public abstract class BaseNetworkGameRule : ScriptableObject
 {
     public const string MatchTimeCountdownKey = "rCD";
-    public const string BotAddedKey = "rBA";
     public const string IsMatchEndedKey = "rMN";
     public const string BotCountKey = "rBC";
     public const string MatchTimeKey = "rMT";
@@ -87,24 +86,6 @@ public abstract class BaseNetworkGameRule : ScriptableObject
             {
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeCountdownKey, value } });
                 _matchTimeCountdown = value;
-            }
-        }
-    }
-
-    private bool _isBotAdded = false;
-    public bool IsBotAdded
-    {
-        get
-        {
-            try { return _isBotAdded = (bool)PhotonNetwork.CurrentRoom.CustomProperties[BotAddedKey]; } catch { }
-            return _isBotAdded;
-        }
-        protected set
-        {
-            if (PhotonNetwork.IsMasterClient)
-            {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { BotAddedKey, value } });
-                _isBotAdded = value;
             }
         }
     }
@@ -216,6 +197,14 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         if (!HasOptionBotCount)
             return;
+        // Remove bots if needed
+        while (Bots.Count > 0 && PhotonNetwork.CurrentRoom.PlayerCount + Bots.Count > BotCount)
+        {
+            int index = Bots.Count - 1;
+            BaseNetworkGameCharacter botCharacter = Bots[index];
+            PhotonNetwork.Destroy(botCharacter.photonView);
+            Bots.RemoveAt(index);
+        }
         // Add bots if needed
         int maxPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
         if (networkManager.isConnectOffline)
@@ -235,14 +224,6 @@ public abstract class BaseNetworkGameRule : ScriptableObject
                 Bots.Add(character);
             }
         }
-        // Remove bots if needed
-        while (PhotonNetwork.CurrentRoom.PlayerCount + Bots.Count > maxPlayers)
-        {
-            int index = Bots.Count - 1;
-            BaseNetworkGameCharacter botCharacter = Bots[index];
-            PhotonNetwork.Destroy(botCharacter.photonView);
-            Bots.RemoveAt(index);
-        }
     }
 
     public virtual void OnStartServer(BaseNetworkGameManager manager)
@@ -253,8 +234,8 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         MatchKill = matchKill;
         MatchScore = matchScore;
         MatchTimeCountdown = MatchTime;
-        IsBotAdded = false;
         IsMatchEnded = false;
+        AddBots();
     }
 
     public virtual void OnStopConnection(BaseNetworkGameManager manager)
@@ -269,12 +250,6 @@ public abstract class BaseNetworkGameRule : ScriptableObject
 
     public virtual void OnUpdate()
     {
-        if (!IsBotAdded)
-        {
-            AddBots();
-            IsBotAdded = true;
-        }
-
         // Make match time reduce every seconds (not every loops)
         matchTimeReduceTimer += Time.unscaledDeltaTime;
         if (matchTimeReduceTimer >= 1)
