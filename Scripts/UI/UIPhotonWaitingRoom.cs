@@ -176,6 +176,9 @@ public class UIPhotonWaitingRoom : UIBase
     private void OnJoinedRoomCallback()
     {
         UpdateRoomData();
+        string key = PhotonNetwork.LocalPlayer.UserId;
+        if (string.IsNullOrEmpty(key))
+            key = SimplePhotonNetworkManager.OFFLINE_USER_ID;
         // Set waiting player list
         for (var i = waitingPlayerListContainer.childCount - 1; i >= 0; --i)
         {
@@ -204,11 +207,11 @@ public class UIPhotonWaitingRoom : UIBase
         }
         foreach (var hostObject in hostObjects)
         {
-            hostObject.SetActive(HostPlayerID == PhotonNetwork.LocalPlayer.UserId);
+            hostObject.SetActive(HostPlayerID == key);
         }
         foreach (var nonHostObject in nonHostObjects)
         {
-            nonHostObject.SetActive(HostPlayerID != PhotonNetwork.LocalPlayer.UserId);
+            nonHostObject.SetActive(HostPlayerID != key);
         }
         if (PhotonNetwork.LocalPlayer.IsMasterClient && hostAlwaysReady)
             SimplePhotonNetworkManager.Singleton.SetPlayerState(PlayerState.Ready);
@@ -240,7 +243,7 @@ public class UIPhotonWaitingRoom : UIBase
     {
         string key = player.UserId;
         if (string.IsNullOrEmpty(key))
-            key = "LocalPlayer";
+            key = SimplePhotonNetworkManager.OFFLINE_USER_ID;
         DestroyPlayerUI(key);
 
         PunTeams.Team team = player.GetTeam();
@@ -268,7 +271,10 @@ public class UIPhotonWaitingRoom : UIBase
     private void UpdatePlayerUI(Player player)
     {
         PunTeams.Team team = player.GetTeam();
-        if (waitingPlayers.ContainsKey(player.UserId))
+        string key = player.UserId;
+        if (string.IsNullOrEmpty(key))
+            key = SimplePhotonNetworkManager.OFFLINE_USER_ID;
+        if (waitingPlayers.ContainsKey(key))
         {
             if (team != PunTeams.Team.none)
             {
@@ -276,9 +282,9 @@ public class UIPhotonWaitingRoom : UIBase
                 CreatePlayerUI(player);
                 return;
             }
-            waitingPlayers[player.UserId].SetData(this, player);
+            waitingPlayers[key].SetData(this, player);
         }
-        if (waitingTeamAPlayers.ContainsKey(player.UserId))
+        if (waitingTeamAPlayers.ContainsKey(key))
         {
             if (team != PunTeams.Team.red)
             {
@@ -286,9 +292,9 @@ public class UIPhotonWaitingRoom : UIBase
                 CreatePlayerUI(player);
                 return;
             }
-            waitingTeamAPlayers[player.UserId].SetData(this, player);
+            waitingTeamAPlayers[key].SetData(this, player);
         }
-        if (waitingTeamBPlayers.ContainsKey(player.UserId))
+        if (waitingTeamBPlayers.ContainsKey(key))
         {
             if (team != PunTeams.Team.blue)
             {
@@ -296,7 +302,7 @@ public class UIPhotonWaitingRoom : UIBase
                 CreatePlayerUI(player);
                 return;
             }
-            waitingTeamBPlayers[player.UserId].SetData(this, player);
+            waitingTeamBPlayers[key].SetData(this, player);
         }
     }
 
@@ -309,17 +315,23 @@ public class UIPhotonWaitingRoom : UIBase
     private void OnPlayerDisconnectedCallback(Player player)
     {
         UpdateRoomData();
-        DestroyPlayerUI(player.UserId);
+        string key = player.UserId;
+        if (string.IsNullOrEmpty(key))
+            key = SimplePhotonNetworkManager.OFFLINE_USER_ID;
+        DestroyPlayerUI(key);
     }
 
     private void OnPlayerPropertiesChangedCallback(Player player, Hashtable props)
     {
-        if (players.ContainsKey(player.UserId))
+        string key = player.UserId;
+        if (string.IsNullOrEmpty(key))
+            key = SimplePhotonNetworkManager.OFFLINE_USER_ID;
+        if (players.ContainsKey(key))
             UpdatePlayerUI(player);
         else
             CreatePlayerUI(player);
 
-        if (PhotonNetwork.IsMasterClient && autoStartWhenPlayersReadyAtLeast > 0 && 
+        if (PhotonNetwork.IsMasterClient && autoStartWhenPlayersReadyAtLeast > 0 &&
             SimplePhotonNetworkManager.Singleton.CountPlayerWithState(PlayerState.Ready) >= autoStartWhenPlayersReadyAtLeast)
         {
             // Start game automatically when ready player reached `autoStartGameWhenPlayersReady` amount

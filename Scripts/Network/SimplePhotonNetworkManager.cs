@@ -21,6 +21,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         Ready,
     }
 
+    public const string OFFLINE_USER_ID = "OFFLINE_USER";
     public const int UNIQUE_VIEW_ID = 999;
     public const string CUSTOM_ROOM_ROOM_NAME = "R";
     public const string CUSTOM_ROOM_ROOM_PASSWORD = "RP";
