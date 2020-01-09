@@ -216,6 +216,8 @@ public class UIPhotonWaitingRoom : UIBase
 
     private void DestroyPlayerUI(string id)
     {
+        if (string.IsNullOrEmpty(id))
+            return;
         if (waitingPlayers.ContainsKey(id))
         {
             Destroy(waitingPlayers[id].gameObject);
@@ -237,6 +239,8 @@ public class UIPhotonWaitingRoom : UIBase
     private void CreatePlayerUI(Player player)
     {
         string key = player.UserId;
+        if (string.IsNullOrEmpty(key))
+            key = "LocalPlayer";
         DestroyPlayerUI(key);
 
         PunTeams.Team team = player.GetTeam();
@@ -258,7 +262,7 @@ public class UIPhotonWaitingRoom : UIBase
         newEntry.gameObject.SetActive(true);
         uiDict.Add(key, newEntry);
 
-        players[player.UserId] = player;
+        players[key] = player;
     }
 
     private void UpdatePlayerUI(Player player)
