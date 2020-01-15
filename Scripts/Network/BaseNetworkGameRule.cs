@@ -252,7 +252,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         // Make match time reduce every seconds (not every loops)
         matchTimeReduceTimer += Time.unscaledDeltaTime;
-        if (matchTimeReduceTimer >= 1)
+        if (matchTimeReduceTimer >= 1 && MatchTimeCountdown > 0)
         {
             matchTimeReduceTimer = 0;
             MatchTimeCountdown -= 1f;
