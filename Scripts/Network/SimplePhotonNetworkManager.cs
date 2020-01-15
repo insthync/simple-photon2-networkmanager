@@ -603,21 +603,21 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        if (isLog) Debug.Log("OnPlayerLeftRoom");
+        if (isLog) Debug.Log("OnPlayerLeftRoom " + otherPlayer.NickName);
         if (onPlayerDisconnected != null)
             onPlayerDisconnected.Invoke(otherPlayer);
     }
 
     public override void OnPlayerPropertiesUpdate(Player player, Hashtable props)
     {
-        if (isLog) Debug.Log("OnPhotonPlayerPropertiesChanged");
+        if (isLog) Debug.Log("OnPhotonPlayerPropertiesChanged " + player.NickName + " " + props.ToStringFull());
         if (onPlayerPropertiesChanged != null)
             onPlayerPropertiesChanged.Invoke(player, props);
     }
 
     public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
     {
-        if (isLog) Debug.Log("OnPhotonCustomRoomPropertiesChanged");
+        if (isLog) Debug.Log("OnPhotonCustomRoomPropertiesChanged " + propertiesThatChanged.ToStringFull());
         if (onCustomRoomPropertiesChanged != null)
             onCustomRoomPropertiesChanged.Invoke(propertiesThatChanged);
     }
