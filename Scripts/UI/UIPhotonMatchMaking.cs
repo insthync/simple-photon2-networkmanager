@@ -19,11 +19,13 @@ public class UIPhotonMatchMaking : UIBase
 
         foreach (var obj in showingObjectsWhileMatchMaking)
         {
+            if (!obj) continue;
             obj.SetActive(SimplePhotonNetworkManager.Singleton.isMatchMaking);
         }
 
         foreach (var obj in hiddingObjectsWhileMatchMaking)
         {
+            if (!obj) continue;
             obj.SetActive(!SimplePhotonNetworkManager.Singleton.isMatchMaking);
         }
     }
