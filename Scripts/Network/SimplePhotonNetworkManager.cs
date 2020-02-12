@@ -136,7 +136,9 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void ConnectToMaster()
     {
+        isConnectOffline = false;
         PhotonNetwork.AutomaticallySyncScene = true;
+        PhotonNetwork.OfflineMode = false;
         PhotonNetwork.ConnectToMaster(masterAddress, masterPort, PhotonNetwork.PhotonServerSettings.AppSettings.AppIdRealtime);
         if (onConnectingToMaster != null)
             onConnectingToMaster.Invoke();
@@ -164,8 +166,9 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void PlayOffline()
     {
-        isConnectOffline = true;
+        isConnectOffline = true; // Set the condition to start offline mode when player create game or room.
         PhotonNetwork.AutomaticallySyncScene = true;
+        PhotonNetwork.OfflineMode = false; // This will turn to be `TRUE` when player create game or room.
         if (onJoinedLobby != null)
             onJoinedLobby.Invoke();
     }
@@ -353,7 +356,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public virtual void LeaveRoom()
     {
         if (isConnectOffline)
-            PhotonNetwork.Disconnect();
+            Disconnect();
         else
             PhotonNetwork.LeaveRoom();
     }
@@ -365,7 +368,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             if (onDisconnected != null)
                 onDisconnected.Invoke();
         }
-        PhotonNetwork.Disconnect();
+        if (PhotonNetwork.IsConnected)
+            PhotonNetwork.Disconnect();
     }
 
     public override void OnRoomListUpdate(List<RoomInfo> rooms)
@@ -530,6 +534,11 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         if (isLog) Debug.Log("OnJoinedRoom");
+        if (isConnectOffline)
+        {
+            // Don't do anything while connect offline, because it don't have to join room.
+            return;
+        }
         if (PhotonNetwork.IsMasterClient)
         {
             if (startGameOnRoomCreated)
