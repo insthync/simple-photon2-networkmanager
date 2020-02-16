@@ -197,32 +197,29 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         if (!HasOptionBotCount)
             return;
-        // Remove bots if needed
-        while (Bots.Count > 0 && PhotonNetwork.CurrentRoom.PlayerCount + Bots.Count > BotCount)
+
+        int playerCount = PhotonNetwork.CurrentRoom.PlayerCount;
+        int maxPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
+        if (networkManager.isConnectOffline)
+            maxPlayers = networkManager.maxConnections;
+
+        // Remove bots if needed, will remove bots if player count + added bots > max players
+        while (Bots.Count > 0 && playerCount + Bots.Count > maxPlayers)
         {
             int index = Bots.Count - 1;
             BaseNetworkGameCharacter botCharacter = Bots[index];
             PhotonNetwork.Destroy(botCharacter.photonView);
             Bots.RemoveAt(index);
         }
-        // Add bots if needed
-        int maxPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
-        if (networkManager.isConnectOffline)
-            maxPlayers = networkManager.maxConnections;
-        if (Bots.Count < BotCount && PhotonNetwork.CurrentRoom.PlayerCount + Bots.Count < maxPlayers)
+
+        // Add bots if needed, will add bots if added bots < bot count && player count + added bots < max players
+        while (Bots.Count < BotCount && playerCount + Bots.Count < maxPlayers)
         {
-            int addAmount = BotCount;
-            // Adjust bot count
-            if (PhotonNetwork.CurrentRoom.PlayerCount + addAmount > maxPlayers)
-                addAmount = maxPlayers - PhotonNetwork.CurrentRoom.PlayerCount;
-            for (var i = 0; i < addAmount; ++i)
-            {
-                var character = NewBot();
-                if (IsTeamGameplay)
-                    character.playerTeam = tempTeam = (tempTeam == PunTeams.Team.red ? PunTeams.Team.blue : PunTeams.Team.red);
-                networkManager.RegisterCharacter(character);
-                Bots.Add(character);
-            }
+            var character = NewBot();
+            if (IsTeamGameplay)
+                character.playerTeam = tempTeam = (tempTeam == PunTeams.Team.red ? PunTeams.Team.blue : PunTeams.Team.red);
+            networkManager.RegisterCharacter(character);
+            Bots.Add(character);
         }
     }
 
