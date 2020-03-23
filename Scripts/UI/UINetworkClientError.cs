@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using Photon.Realtime;
+using System.Text.RegularExpressions;
 
 public class UINetworkClientError : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class UINetworkClientError : MonoBehaviour
         if (messageDialog == null)
             return;
 
-        messageDialog.Show(error.ToString());
+        messageDialog.Show(Regex.Replace(error.ToString(), "(?!^)([A-Z])", " $1"));
         onConnectionError.Invoke(error.ToString());
     }
 
