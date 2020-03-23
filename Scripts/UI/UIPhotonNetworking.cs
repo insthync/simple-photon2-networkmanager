@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
+using Photon.Realtime;
 
 public class UIPhotonNetworking : UIBase
 {
@@ -49,6 +50,7 @@ public class UIPhotonNetworking : UIBase
         SimplePhotonNetworkManager.onJoinedRoom += OnJoinedRoomCallback;
         SimplePhotonNetworkManager.onLeftRoom += OnLeftRoomCallback;
         SimplePhotonNetworkManager.onDisconnected += OnDisconnectedCallback;
+        SimplePhotonNetworkManager.onConnectionError += OnConnectionErrorCallback;
     }
 
     private void OnDisable()
@@ -58,6 +60,7 @@ public class UIPhotonNetworking : UIBase
         SimplePhotonNetworkManager.onJoinedRoom -= OnJoinedRoomCallback;
         SimplePhotonNetworkManager.onLeftRoom -= OnLeftRoomCallback;
         SimplePhotonNetworkManager.onDisconnected -= OnDisconnectedCallback;
+        SimplePhotonNetworkManager.onConnectionError -= OnConnectionErrorCallback;
     }
 
     private void OnDestroy()
@@ -67,6 +70,7 @@ public class UIPhotonNetworking : UIBase
         SimplePhotonNetworkManager.onJoinedRoom -= OnJoinedRoomCallback;
         SimplePhotonNetworkManager.onLeftRoom -= OnLeftRoomCallback;
         SimplePhotonNetworkManager.onDisconnected -= OnDisconnectedCallback;
+        SimplePhotonNetworkManager.onConnectionError -= OnConnectionErrorCallback;
     }
 
     private void OnReceivedRoomListUpdateCallback(List<NetworkDiscoveryData> discoveryData)
@@ -115,6 +119,15 @@ public class UIPhotonNetworking : UIBase
     }
 
     private void OnDisconnectedCallback()
+    {
+        if (uiDisconnected != null)
+            uiDisconnected.Show();
+
+        if (uiConnected != null)
+            uiConnected.Hide();
+    }
+
+    private void OnConnectionErrorCallback(DisconnectCause cause)
     {
         if (uiDisconnected != null)
             uiDisconnected.Show();
