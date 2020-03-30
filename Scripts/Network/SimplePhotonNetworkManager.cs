@@ -409,13 +409,21 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     {
         if (isQuitting)
             return;
+        if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
+            SceneManager.LoadScene(offlineScene.SceneName);
+        OnStopMatchMaking();
+        if (isConnectOffline)
+        {
+            // Connect offline, so it won't cause connection error
+            if (onDisconnected != null)
+                onDisconnected.Invoke();
+            return;
+        }
         if (isLog) Debug.Log("OnDisconnected " + cause.ToString());
         switch (cause)
         {
             case DisconnectCause.None:
             case DisconnectCause.DisconnectByClientLogic:
-                if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
-                    SceneManager.LoadScene(offlineScene.SceneName);
                 if (onDisconnected != null)
                     onDisconnected.Invoke();
                 break;
@@ -424,7 +432,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
                     onConnectionError.Invoke(cause);
                 break;
         }
-        OnStopMatchMaking();
     }
 
     public override void OnLeftRoom()
@@ -745,6 +752,9 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public static RoomState GetRoomState()
     {
+        if (PhotonNetwork.OfflineMode)
+            return RoomState.Playing;
+
         if (!PhotonNetwork.InRoom)
             return RoomState.Waiting;
 
