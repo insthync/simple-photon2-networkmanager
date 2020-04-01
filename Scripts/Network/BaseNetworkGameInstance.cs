@@ -38,7 +38,12 @@ public abstract class BaseNetworkGameInstance : MonoBehaviour
             foreach (var gameRule in map.availableGameRules)
             {
                 if (!GameRules.ContainsKey(gameRule.name))
+                {
+                    gameRule.matchTime = gameRule.DefaultMatchTime;
+                    gameRule.matchKill = gameRule.DefaultMatchKill;
+                    gameRule.matchScore = gameRule.DefaultMatchScore;
                     GameRules[gameRule.name] = gameRule;
+                }
             }
             MapListBySceneNames[map.scene.SceneName] = map;
         }
