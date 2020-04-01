@@ -337,5 +337,13 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
     }
 
+    public virtual void InitData()
+    {
+        botCount = DefaultBotCount;
+        matchTime = DefaultMatchTime;
+        matchKill = DefaultMatchKill;
+        matchScore = DefaultMatchScore;
+    }
+
     public abstract void InitialClientObjects();
 }

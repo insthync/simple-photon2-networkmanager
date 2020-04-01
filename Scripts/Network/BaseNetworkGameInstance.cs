@@ -39,10 +39,7 @@ public abstract class BaseNetworkGameInstance : MonoBehaviour
             {
                 if (!GameRules.ContainsKey(gameRule.name))
                 {
-                    gameRule.botCount = gameRule.DefaultBotCount;
-                    gameRule.matchTime = gameRule.DefaultMatchTime;
-                    gameRule.matchKill = gameRule.DefaultMatchKill;
-                    gameRule.matchScore = gameRule.DefaultMatchScore;
+                    gameRule.InitData();
                     GameRules[gameRule.name] = gameRule;
                 }
             }
