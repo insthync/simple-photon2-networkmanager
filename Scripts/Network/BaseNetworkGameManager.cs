@@ -6,7 +6,7 @@ using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
-[RequireComponent(typeof(PunTeams))]
+[RequireComponent(typeof(PhotonTeamsManager))]
 public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
 {
     public static new BaseNetworkGameManager Singleton
@@ -14,7 +14,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         get { return SimplePhotonNetworkManager.Singleton as BaseNetworkGameManager; }
     }
 
-    public PunTeams Teams { get; private set; }
+    public PhotonTeamsManager Teams { get; private set; }
 
     public const string CUSTOM_ROOM_GAME_RULE = "G";
     public const string CUSTOM_ROOM_GAME_RULE_BOT_COUNT = "Gbc";
@@ -35,9 +35,9 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     {
         // Setup required components
         if (Teams == null)
-            Teams = GetComponent<PunTeams>();
+            Teams = GetComponent<PhotonTeamsManager>();
         if (Teams == null)
-            Teams = gameObject.AddComponent<PunTeams>();
+            Teams = gameObject.AddComponent<PhotonTeamsManager>();
     }
 
     public int CountAliveCharacters()
@@ -317,10 +317,21 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     public override void OnOnlineSceneChanged()
     {
         if (isLog) Debug.Log("OnOnlineSceneChanged");
+        StartCoroutine(OnOnlineSceneChangedRoutine());
+    }
+
+    IEnumerator OnOnlineSceneChangedRoutine()
+    {
         // Reset last game/match data
         ResetGame();
         // Get game rule to initial client objects
         var customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
+        while (customProperties.Count == 0)
+        {
+            // Wait for loading properties
+            yield return null;
+            customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
+        }
         var gameRuleName = (string)customProperties[CUSTOM_ROOM_GAME_RULE];
         BaseNetworkGameRule foundGameRule;
         if (BaseNetworkGameInstance.GameRules.TryGetValue(gameRuleName, out foundGameRule))
@@ -396,13 +407,22 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     {
         bool isTeamGameplay = gameRule != null && gameRule.IsTeamGameplay;
         if (!isTeamGameplay)
-            player.SetTeam(PunTeams.Team.none);
+        {
+            player.LeaveCurrentTeam();
+        }
         else
         {
-            if (PunTeams.PlayersPerTeam[PunTeams.Team.red].Count > PunTeams.PlayersPerTeam[PunTeams.Team.blue].Count)
-                player.SetTeam(PunTeams.Team.blue);
-            else
-                player.SetTeam(PunTeams.Team.red);
+            // TODO: Improve team codes
+            Player[] players1;
+            Player[] players2;
+            if (Teams.TryGetTeamMembers(1, out players1) &&
+                Teams.TryGetTeamMembers(2, out players2))
+            {
+                if (players1.Length > players2.Length)
+                    player.JoinOrSwitchTeam(2);
+                else
+                    player.JoinOrSwitchTeam(1);
+            }
         }
     }
 
@@ -423,7 +443,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
             var score = new NetworkGameScore();
             score.viewId = (int)objects[j++];
             score.playerName = (string)objects[j++];
-            score.team = (PunTeams.Team)objects[j++];
+            score.team = (byte)objects[j++];
             score.score = (int)objects[j++];
             score.killCount = (int)objects[j++];
             score.assistCount = (int)objects[j++];
@@ -452,20 +472,29 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         {
             bool isTeamGameplay = gameRule != null && gameRule.IsTeamGameplay;
             if (!isTeamGameplay)
-                foundPlayer.SetTeam(PunTeams.Team.none);
+            {
+                foundPlayer.LeaveCurrentTeam();
+            }
             else
             {
                 var maxPlayerEachTeam = PhotonNetwork.CurrentRoom.MaxPlayers / 2;
-                switch (foundPlayer.GetTeam())
+                // TODO: Improve team codes
+                Player[] players1;
+                Player[] players2;
+                if (Teams.TryGetTeamMembers(1, out players1) &&
+                    Teams.TryGetTeamMembers(2, out players2))
                 {
-                    case PunTeams.Team.red:
-                        if (PunTeams.PlayersPerTeam[PunTeams.Team.blue].Count < maxPlayerEachTeam)
-                            foundPlayer.SetTeam(PunTeams.Team.blue);
-                        break;
-                    default:
-                        if (PunTeams.PlayersPerTeam[PunTeams.Team.red].Count < maxPlayerEachTeam)
-                            foundPlayer.SetTeam(PunTeams.Team.red);
-                        break;
+                    switch (foundPlayer.GetPhotonTeam().Code)
+                    {
+                        case 1:
+                            if (players1.Length < maxPlayerEachTeam)
+                                foundPlayer.JoinOrSwitchTeam(2);
+                            break;
+                        case 2:
+                            if (players2.Length < maxPlayerEachTeam)
+                                foundPlayer.JoinOrSwitchTeam(1);
+                            break;
+                    }
                 }
             }
         }

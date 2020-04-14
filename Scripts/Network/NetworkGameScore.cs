@@ -6,7 +6,7 @@ public struct NetworkGameScore
     public static readonly NetworkGameScore Empty = new NetworkGameScore();
     public int viewId;
     public string playerName;
-    public PunTeams.Team team;
+    public byte team;
     public int score;
     public int killCount;
     public int assistCount;

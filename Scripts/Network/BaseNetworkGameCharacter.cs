@@ -26,10 +26,25 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
         get { return (photonView != null && photonView.Owner != null) ? photonView.Owner.NickName : ""; }
         set { if (photonView.IsMine) photonView.Owner.NickName = value; }
     }
-    public virtual PunTeams.Team playerTeam
+    public virtual byte playerTeam
     {
-        get { return (photonView != null && photonView.Owner != null) ? photonView.Owner.GetTeam() : PunTeams.Team.none; }
-        set { if (photonView.IsMine) photonView.Owner.SetTeam(value); }
+        get
+        {
+            if (photonView != null && photonView.Owner != null && photonView.Owner.GetPhotonTeam() != null)
+                return photonView.Owner.GetPhotonTeam().Code;
+            else
+                return 0;
+        }
+        set
+        {
+            if (photonView.IsMine)
+            {
+                if (value == 0)
+                    photonView.Owner.LeaveCurrentTeam();
+                else
+                    photonView.Owner.JoinOrSwitchTeam(value);
+            }
+        }
     }
     public int score
     {
@@ -219,15 +234,15 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
 
         foreach (var obj in noTeamObjects)
         {
-            obj.SetActive(playerTeam == PunTeams.Team.none);
+            obj.SetActive(playerTeam == 0);
         }
         foreach (var obj in teamAObjects)
         {
-            obj.SetActive(playerTeam == PunTeams.Team.red);
+            obj.SetActive(playerTeam == 1);
         }
         foreach (var obj in teamBObjects)
         {
-            obj.SetActive(playerTeam == PunTeams.Team.blue);
+            obj.SetActive(playerTeam == 2);
         }
     }
 

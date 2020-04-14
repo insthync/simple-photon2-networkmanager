@@ -169,7 +169,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     }
 
     private float matchTimeReduceTimer;
-    private PunTeams.Team tempTeam;
+    private byte tempTeam;
 
     public virtual void AddBots()
     {
@@ -187,7 +187,10 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         {
             var character = NewBot();
             if (IsTeamGameplay)
-                character.playerTeam = tempTeam = (tempTeam == PunTeams.Team.red ? PunTeams.Team.blue : PunTeams.Team.red);
+            {
+                // TODO: Improve team codes
+                character.playerTeam = tempTeam = (byte)(tempTeam == 1 ? 2 : 1);
+            }
             networkManager.RegisterCharacter(character);
             Bots.Add(character);
         }
@@ -217,7 +220,10 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         {
             var character = NewBot();
             if (IsTeamGameplay)
-                character.playerTeam = tempTeam = (tempTeam == PunTeams.Team.red ? PunTeams.Team.blue : PunTeams.Team.red);
+            {
+                // TODO: Improve team codes
+                character.playerTeam = tempTeam = (byte)(tempTeam == 1 ? 2 : 1);
+            }
             networkManager.RegisterCharacter(character);
             Bots.Add(character);
         }
@@ -271,12 +277,13 @@ public abstract class BaseNetworkGameRule : ScriptableObject
 
         if (IsTeamGameplay)
         {
+            // TODO: Improve team codes
             switch (character.playerTeam)
             {
-                case PunTeams.Team.red:
+                case 1:
                     TeamScoreA += increaseAmount;
                     break;
-                case PunTeams.Team.blue:
+                case 2:
                     TeamScoreB += increaseAmount;
                     break;
             }
@@ -292,12 +299,13 @@ public abstract class BaseNetworkGameRule : ScriptableObject
 
         if (IsTeamGameplay)
         {
+            // TODO: Improve team codes
             switch (character.playerTeam)
             {
-                case PunTeams.Team.red:
+                case 1:
                     TeamKillA += increaseAmount;
                     break;
-                case PunTeams.Team.blue:
+                case 2:
                     TeamKillB += increaseAmount;
                     break;
             }
@@ -313,11 +321,11 @@ public abstract class BaseNetworkGameRule : ScriptableObject
             // Use team score / kill as checker
             switch (character.playerTeam)
             {
-                case PunTeams.Team.red:
+                case 1:
                     checkScore = TeamScoreA;
                     checkKill = TeamKillA;
                     break;
-                case PunTeams.Team.blue:
+                case 2:
                     checkScore = TeamScoreB;
                     checkKill = TeamKillB;
                     break;

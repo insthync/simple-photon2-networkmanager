@@ -39,10 +39,10 @@ public class UINetworkGameScoreEntry : MonoBehaviour
         {
             switch (ranking.team)
             {
-                case PunTeams.Team.red:
+                case 1:
                     textTeam.text = teamA;
                     break;
-                case PunTeams.Team.blue:
+                case 2:
                     textTeam.text = teamB;
                     break;
                 default:

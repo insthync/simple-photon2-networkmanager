@@ -246,16 +246,17 @@ public class UIPhotonWaitingRoom : UIBase
             key = SimplePhotonNetworkManager.OFFLINE_USER_ID;
         DestroyPlayerUI(key);
 
-        PunTeams.Team team = player.GetTeam();
+        PhotonTeam team = player.GetPhotonTeam();
         Transform container = waitingPlayerListContainer;
         Dictionary<string, UIPhotonWaitingPlayer> uiDict = waitingPlayers;
-        switch (team)
+        // TODO: Improve team codes
+        switch (team.Code)
         {
-            case PunTeams.Team.red:
+            case 1:
                 container = waitingPlayerTeamAListContainer;
                 uiDict = waitingTeamAPlayers;
                 break;
-            case PunTeams.Team.blue:
+            case 2:
                 container = waitingPlayerTeamBListContainer;
                 uiDict = waitingTeamBPlayers;
                 break;
@@ -270,13 +271,13 @@ public class UIPhotonWaitingRoom : UIBase
 
     private void UpdatePlayerUI(Player player)
     {
-        PunTeams.Team team = player.GetTeam();
+        PhotonTeam team = player.GetPhotonTeam();
         string key = player.UserId;
         if (string.IsNullOrEmpty(key))
             key = SimplePhotonNetworkManager.OFFLINE_USER_ID;
         if (waitingPlayers.ContainsKey(key))
         {
-            if (team != PunTeams.Team.none)
+            if (team.Code != 0)
             {
                 // If player team changed, recreate waiting player UI
                 CreatePlayerUI(player);
@@ -286,7 +287,7 @@ public class UIPhotonWaitingRoom : UIBase
         }
         if (waitingTeamAPlayers.ContainsKey(key))
         {
-            if (team != PunTeams.Team.red)
+            if (team.Code != 1)
             {
                 // If player team changed, recreate waiting player UI
                 CreatePlayerUI(player);
@@ -296,7 +297,7 @@ public class UIPhotonWaitingRoom : UIBase
         }
         if (waitingTeamBPlayers.ContainsKey(key))
         {
-            if (team != PunTeams.Team.blue)
+            if (team.Code != 2)
             {
                 // If player team changed, recreate waiting player UI
                 CreatePlayerUI(player);
