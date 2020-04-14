@@ -126,46 +126,130 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
     }
 
+    private int _matchTime = 0;
     public int MatchTime
     {
-        get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeKey]; } catch { } return 0; }
-        protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeKey, value } }); }
+        get
+        {
+            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeKey]; } catch { }
+            return _matchTime;
+        }
+        protected set
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeKey, value } });
+                _matchTime = value;
+            }
+        }
     }
 
+    private int _matchKill = 0;
     public int MatchKill
     {
-        get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchKillKey]; } catch { } return 0; }
-        protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchKillKey, value } }); }
+        get
+        {
+            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchKillKey]; } catch { }
+            return _matchKill;
+        }
+        protected set
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchKillKey, value } });
+                _matchKill = value;
+            }
+        }
     }
 
+    private int _matchScore = 0;
     public int MatchScore
     {
-        get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchScoreKey]; } catch { } return 0; }
-        protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchScoreKey, value } }); }
+        get
+        {
+            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchScoreKey]; } catch { }
+            return _matchScore;
+        }
+        protected set
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchScoreKey, value } });
+                _matchScore = value;
+            }
+        }
     }
 
+    private int _teamScoreA = 0;
     public int TeamScoreA
     {
-        get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamScoreAKey]; } catch { } return 0; }
-        protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreAKey, value } }); }
+        get
+        {
+            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamScoreAKey]; } catch { }
+            return _teamScoreA;
+        }
+        protected set
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreAKey, value } });
+                _teamScoreA = value;
+            }
+        }
     }
 
+    private int _teamScoreB = 0;
     public int TeamScoreB
     {
-        get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamScoreBKey]; } catch { } return 0; }
-        protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreBKey, value } }); }
+        get
+        {
+            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamScoreBKey]; } catch { }
+            return _teamScoreB;
+        }
+        protected set
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreBKey, value } });
+                _teamScoreB = value;
+            }
+        }
     }
 
+    private int _teamKillA = 0;
     public int TeamKillA
     {
-        get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamKillAKey]; } catch { } return 0; }
-        protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamKillAKey, value } }); }
+        get
+        {
+            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamKillAKey]; } catch { }
+            return _teamKillA;
+        }
+        protected set
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamKillAKey, value } });
+                _teamKillA = value;
+            }
+        }
     }
 
+    private int _teamKillB = 0;
     public int TeamKillB
     {
-        get { try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamKillBKey]; } catch { } return 0; }
-        protected set { if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamKillBKey, value } }); }
+        get
+        {
+            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamKillBKey]; } catch { }
+            return _teamKillB;
+        }
+        protected set
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamKillBKey, value } });
+                _teamKillB = value;
+            }
+        }
     }
 
     private float matchTimeReduceTimer;
