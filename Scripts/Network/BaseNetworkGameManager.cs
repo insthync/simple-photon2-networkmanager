@@ -317,24 +317,28 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     public override void OnOnlineSceneChanged()
     {
         if (isLog) Debug.Log("OnOnlineSceneChanged");
-        StartCoroutine(OnOnlineSceneChangedRoutine());
-    }
-
-    IEnumerator OnOnlineSceneChangedRoutine()
-    {
         // Reset last game/match data
         ResetGame();
-        // Get game rule to initial client objects
-        var customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
-        while (customProperties.Count == 0)
+        onlineSceneLoaded = true;
+        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(CUSTOM_ROOM_GAME_RULE))
         {
-            // Wait for loading properties
-            yield return null;
-            customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
+            InitGameRule((string)PhotonNetwork.CurrentRoom.CustomProperties[CUSTOM_ROOM_GAME_RULE]);
         }
-        var gameRuleName = (string)customProperties[CUSTOM_ROOM_GAME_RULE];
+    }
+
+    public override void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged)
+    {
+        base.OnRoomPropertiesUpdate(propertiesThatChanged);
+        if (propertiesThatChanged.ContainsKey(CUSTOM_ROOM_GAME_RULE))
+        {
+            InitGameRule((string)propertiesThatChanged[CUSTOM_ROOM_GAME_RULE]);
+        }
+    }
+
+    protected void InitGameRule(string gameRuleName)
+    {
         BaseNetworkGameRule foundGameRule;
-        if (BaseNetworkGameInstance.GameRules.TryGetValue(gameRuleName, out foundGameRule))
+        if (BaseNetworkGameInstance.GameRules.TryGetValue(gameRuleName, out foundGameRule) && onlineSceneLoaded)
         {
             gameRule = foundGameRule;
             gameRule.InitialClientObjects();
@@ -484,16 +488,26 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                 if (Teams.TryGetTeamMembers(1, out players1) &&
                     Teams.TryGetTeamMembers(2, out players2))
                 {
-                    switch (foundPlayer.GetPhotonTeam().Code)
+                    if (foundPlayer.GetPhotonTeam() == null)
                     {
-                        case 1:
-                            if (players1.Length < maxPlayerEachTeam)
-                                foundPlayer.JoinOrSwitchTeam(2);
-                            break;
-                        case 2:
-                            if (players2.Length < maxPlayerEachTeam)
-                                foundPlayer.JoinOrSwitchTeam(1);
-                            break;
+                        if (players1.Length > players2.Length)
+                            foundPlayer.JoinOrSwitchTeam(2);
+                        else
+                            foundPlayer.JoinOrSwitchTeam(1);
+                    }
+                    else
+                    {
+                        switch (foundPlayer.GetPhotonTeam().Code)
+                        {
+                            case 1:
+                                if (players1.Length < maxPlayerEachTeam)
+                                    foundPlayer.JoinOrSwitchTeam(2);
+                                break;
+                            case 2:
+                                if (players2.Length < maxPlayerEachTeam)
+                                    foundPlayer.JoinOrSwitchTeam(1);
+                                break;
+                        }
                     }
                 }
             }

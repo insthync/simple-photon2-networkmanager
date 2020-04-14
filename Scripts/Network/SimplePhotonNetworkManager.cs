@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Photon;
 using Photon.Pun;
 using Photon.Realtime;
+using Photon.Pun.UtilityScripts;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
@@ -72,6 +72,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     private bool startGameOnRoomCreated;
     private Hashtable cacheMatchMakingFilters;
     protected bool isQuitting;
+    protected bool onlineSceneLoaded;
 
     protected virtual void Awake()
     {
@@ -409,6 +410,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     {
         if (isQuitting)
             return;
+        onlineSceneLoaded = false;
         if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
             SceneManager.LoadScene(offlineScene.SceneName);
         OnStopMatchMaking();
@@ -439,6 +441,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         if (isQuitting)
             return;
         if (isLog) Debug.Log("OnLeftRoom");
+        onlineSceneLoaded = false;
         if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
             SceneManager.LoadScene(offlineScene.SceneName);
         if (onLeftRoom != null)
@@ -596,6 +599,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     /// </summary>
     public virtual void OnOnlineSceneChanged()
     {
+        onlineSceneLoaded = true;
     }
 
     public override void OnMasterClientSwitched(Player newMasterClient)

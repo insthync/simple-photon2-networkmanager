@@ -78,11 +78,27 @@ public class UIPhotonWaitingRoom : UIBase
     {
         var room = PhotonNetwork.CurrentRoom;
         var customProperties = room.CustomProperties;
-        var roomName = (string)customProperties[SimplePhotonNetworkManager.CUSTOM_ROOM_ROOM_NAME];
-        var playerId = (string)customProperties[SimplePhotonNetworkManager.CUSTOM_ROOM_PLAYER_ID];
-        var playerName = (string)customProperties[SimplePhotonNetworkManager.CUSTOM_ROOM_PLAYER_NAME];
-        var sceneName = (string)customProperties[SimplePhotonNetworkManager.CUSTOM_ROOM_SCENE_NAME];
-        var state = (byte)customProperties[SimplePhotonNetworkManager.CUSTOM_ROOM_STATE];
+        object tempObj;
+        // Room name
+        string roomName = string.Empty;
+        if (customProperties.TryGetValue(SimplePhotonNetworkManager.CUSTOM_ROOM_ROOM_NAME, out tempObj))
+            roomName = (string)tempObj;
+        // Player Id
+        string playerId = string.Empty;
+        if (customProperties.TryGetValue(SimplePhotonNetworkManager.CUSTOM_ROOM_PLAYER_ID, out tempObj))
+            playerId = (string)tempObj;
+        // Player Name
+        string playerName = string.Empty;
+        if (customProperties.TryGetValue(SimplePhotonNetworkManager.CUSTOM_ROOM_PLAYER_NAME, out tempObj))
+            playerName = (string)tempObj;
+        // Room Scene Name
+        string sceneName = string.Empty;
+        if (customProperties.TryGetValue(SimplePhotonNetworkManager.CUSTOM_ROOM_SCENE_NAME, out tempObj))
+            sceneName = (string)tempObj;
+        // Room State
+        byte state = 0;
+        if (customProperties.TryGetValue(SimplePhotonNetworkManager.CUSTOM_ROOM_STATE, out tempObj))
+            state = (byte)tempObj;
 
         if (textRoomName != null)
             textRoomName.text = string.IsNullOrEmpty(roomName) ? "Untitled" : roomName;
@@ -104,48 +120,44 @@ public class UIPhotonWaitingRoom : UIBase
                     break;
             }
         }
-
-        object gameRuleObject;
+        
         BaseNetworkGameRule gameRule = null;
-        if (textGameRule != null &&
-            customProperties.TryGetValue(BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE, out gameRuleObject) &&
-            BaseNetworkGameInstance.GameRules.TryGetValue(gameRuleObject.ToString(), out gameRule))
-            textGameRule.text = gameRule == null ? "Unknow" : gameRule.Title;
-
-        waitingPlayerListRoot.SetActive(!gameRule.IsTeamGameplay);
-        waitingPlayerTeamAListRoot.SetActive(gameRule.IsTeamGameplay);
-        waitingPlayerTeamBListRoot.SetActive(gameRule.IsTeamGameplay);
-
-        object botCountObject;
-        if (textBotCount != null &&
-            customProperties.TryGetValue(BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE_BOT_COUNT, out botCountObject))
+        if (customProperties.TryGetValue(BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE, out tempObj) &&
+            BaseNetworkGameInstance.GameRules.TryGetValue((string)tempObj, out gameRule))
         {
-            textBotCount.text = ((int)botCountObject).ToString("N0");
+            if (textGameRule != null)
+                textGameRule.text = gameRule == null ? "Unknow" : gameRule.Title;
+
+            waitingPlayerListRoot.SetActive(!gameRule.IsTeamGameplay);
+            waitingPlayerTeamAListRoot.SetActive(gameRule.IsTeamGameplay);
+            waitingPlayerTeamBListRoot.SetActive(gameRule.IsTeamGameplay);
+        }
+        
+        if (textBotCount != null &&
+            customProperties.TryGetValue(BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE_BOT_COUNT, out tempObj))
+        {
+            textBotCount.text = ((int)tempObj).ToString("N0");
             textBotCount.gameObject.SetActive(gameRule != null && gameRule.HasOptionBotCount);
         }
-
-        object matchTimeObject;
+        
         if (textMatchTime != null &&
-            customProperties.TryGetValue(BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE_MATCH_TIME, out matchTimeObject))
+            customProperties.TryGetValue(BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE_MATCH_TIME, out tempObj))
         {
-            textMatchTime.text = ((int)matchTimeObject).ToString("N0");
+            textMatchTime.text = ((int)tempObj).ToString("N0");
             textMatchTime.gameObject.SetActive(gameRule != null && gameRule.HasOptionMatchTime);
         }
-
-        object matchKillObject;
+        
         if (textMatchKill != null &&
-            customProperties.TryGetValue(BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE_MATCH_KILL, out matchKillObject))
+            customProperties.TryGetValue(BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE_MATCH_KILL, out tempObj))
         {
-            textMatchKill.text = ((int)matchKillObject).ToString("N0");
+            textMatchKill.text = ((int)tempObj).ToString("N0");
             textMatchKill.gameObject.SetActive(gameRule != null && gameRule.HasOptionMatchKill);
         }
-
-        object matchScoreObject;
+        
         if (textMatchScore != null &&
-            customProperties.TryGetValue(BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE_MATCH_SCORE,
-                out matchScoreObject))
+            customProperties.TryGetValue(BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE_MATCH_SCORE, out tempObj))
         {
-            textMatchScore.text = ((int)matchScoreObject).ToString("N0");
+            textMatchScore.text = ((int)tempObj).ToString("N0");
             textMatchScore.gameObject.SetActive(gameRule != null && gameRule.HasOptionMatchScore);
         }
 
@@ -250,16 +262,19 @@ public class UIPhotonWaitingRoom : UIBase
         Transform container = waitingPlayerListContainer;
         Dictionary<string, UIPhotonWaitingPlayer> uiDict = waitingPlayers;
         // TODO: Improve team codes
-        switch (team.Code)
+        if (team != null)
         {
-            case 1:
-                container = waitingPlayerTeamAListContainer;
-                uiDict = waitingTeamAPlayers;
-                break;
-            case 2:
-                container = waitingPlayerTeamBListContainer;
-                uiDict = waitingTeamBPlayers;
-                break;
+            switch (team.Code)
+            {
+                case 1:
+                    container = waitingPlayerTeamAListContainer;
+                    uiDict = waitingTeamAPlayers;
+                    break;
+                case 2:
+                    container = waitingPlayerTeamBListContainer;
+                    uiDict = waitingTeamBPlayers;
+                    break;
+            }
         }
         UIPhotonWaitingPlayer newEntry = Instantiate(waitingPlayerPrefab, container);
         newEntry.SetData(this, player);
@@ -277,7 +292,7 @@ public class UIPhotonWaitingRoom : UIBase
             key = SimplePhotonNetworkManager.OFFLINE_USER_ID;
         if (waitingPlayers.ContainsKey(key))
         {
-            if (team.Code != 0)
+            if (team != null)
             {
                 // If player team changed, recreate waiting player UI
                 CreatePlayerUI(player);
@@ -287,7 +302,7 @@ public class UIPhotonWaitingRoom : UIBase
         }
         if (waitingTeamAPlayers.ContainsKey(key))
         {
-            if (team.Code != 1)
+            if (team == null || team.Code != 1)
             {
                 // If player team changed, recreate waiting player UI
                 CreatePlayerUI(player);
@@ -297,7 +312,7 @@ public class UIPhotonWaitingRoom : UIBase
         }
         if (waitingTeamBPlayers.ContainsKey(key))
         {
-            if (team.Code != 2)
+            if (team == null || team.Code != 2)
             {
                 // If player team changed, recreate waiting player UI
                 CreatePlayerUI(player);
