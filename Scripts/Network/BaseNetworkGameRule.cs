@@ -77,12 +77,12 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return _matchTimeCountdown = (float)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeCountdownKey]; } catch { }
+            try { return (float)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeCountdownKey]; } catch { }
             return _matchTimeCountdown;
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && value != MatchTimeCountdown)
             {
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeCountdownKey, value } });
                 _matchTimeCountdown = value;
@@ -95,12 +95,12 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return _isMatchEnded = (bool)PhotonNetwork.CurrentRoom.CustomProperties[IsMatchEndedKey]; } catch { }
+            try { return (bool)PhotonNetwork.CurrentRoom.CustomProperties[IsMatchEndedKey]; } catch { }
             return _isMatchEnded;
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && value != IsMatchEnded)
             {
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { IsMatchEndedKey, value } });
                 _isMatchEnded = value;
@@ -113,12 +113,12 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return _botCount = (int)PhotonNetwork.CurrentRoom.CustomProperties[BotCountKey]; } catch { }
+            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[BotCountKey]; } catch { }
             return _botCount;
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && value != BotCount)
             {
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { BotCountKey, value } });
                 _botCount = value;
@@ -136,7 +136,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && value != MatchTime)
             {
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeKey, value } });
                 _matchTime = value;
@@ -154,7 +154,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && value != MatchKill)
             {
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchKillKey, value } });
                 _matchKill = value;
@@ -172,7 +172,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && value != MatchScore)
             {
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchScoreKey, value } });
                 _matchScore = value;
@@ -190,7 +190,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && value != TeamScoreA)
             {
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreAKey, value } });
                 _teamScoreA = value;
@@ -208,7 +208,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && value != TeamScoreB)
             {
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreBKey, value } });
                 _teamScoreB = value;
@@ -226,7 +226,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && value != TeamKillA)
             {
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamKillAKey, value } });
                 _teamKillA = value;
@@ -244,7 +244,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient)
+            if (PhotonNetwork.IsMasterClient && value != TeamKillB)
             {
                 PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamKillBKey, value } });
                 _teamKillB = value;
