@@ -71,183 +71,153 @@ public abstract class BaseNetworkGameRule : ScriptableObject
             return 0f;
         }
     }
-
-    private float _matchTimeCountdown = 0f;
-    public float MatchTimeCountdown
+    
+    public int MatchTimeCountdown
     {
         get
         {
-            try { return (float)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeCountdownKey]; } catch { }
-            return _matchTimeCountdown;
+            return (int)SimplePhotonNetworkManager.Singleton.GetRoomProperty(MatchTimeCountdownKey);
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient && value != MatchTimeCountdown)
+            if (PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeCountdownKey, value } });
-                _matchTimeCountdown = value;
+                SimplePhotonNetworkManager.Singleton.SetRoomProperty(MatchTimeCountdownKey, value);
             }
         }
     }
-
-    private bool _isMatchEnded = false;
+    
     public bool IsMatchEnded
     {
         get
         {
-            try { return (bool)PhotonNetwork.CurrentRoom.CustomProperties[IsMatchEndedKey]; } catch { }
-            return _isMatchEnded;
+            return (bool)SimplePhotonNetworkManager.Singleton.GetRoomProperty(IsMatchEndedKey);
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient && value != IsMatchEnded)
+            if (PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { IsMatchEndedKey, value } });
-                _isMatchEnded = value;
+                SimplePhotonNetworkManager.Singleton.SetRoomProperty(IsMatchEndedKey, value);
             }
         }
     }
-
-    private int _botCount = 0;
+    
     public int BotCount
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[BotCountKey]; } catch { }
-            return _botCount;
+            return (int)SimplePhotonNetworkManager.Singleton.GetRoomProperty(BotCountKey);
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient && value != BotCount)
+            if (PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { BotCountKey, value } });
-                _botCount = value;
+                SimplePhotonNetworkManager.Singleton.SetRoomProperty(BotCountKey, value);
             }
         }
     }
-
-    private int _matchTime = 0;
+    
     public int MatchTime
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeKey]; } catch { }
-            return _matchTime;
+            return (int)SimplePhotonNetworkManager.Singleton.GetRoomProperty(MatchTimeKey);
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient && value != MatchTime)
+            if (PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeKey, value } });
-                _matchTime = value;
+                SimplePhotonNetworkManager.Singleton.SetRoomProperty(MatchTimeKey, value);
             }
         }
     }
-
-    private int _matchKill = 0;
+    
     public int MatchKill
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchKillKey]; } catch { }
-            return _matchKill;
+            return (int)SimplePhotonNetworkManager.Singleton.GetRoomProperty(MatchKillKey);
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient && value != MatchKill)
+            if (PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchKillKey, value } });
-                _matchKill = value;
+                SimplePhotonNetworkManager.Singleton.SetRoomProperty(MatchKillKey, value);
             }
         }
     }
-
-    private int _matchScore = 0;
+    
     public int MatchScore
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchScoreKey]; } catch { }
-            return _matchScore;
+            return (int)SimplePhotonNetworkManager.Singleton.GetRoomProperty(MatchScoreKey);
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient && value != MatchScore)
+            if (PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchScoreKey, value } });
-                _matchScore = value;
+                SimplePhotonNetworkManager.Singleton.SetRoomProperty(MatchScoreKey, value);
             }
         }
     }
-
-    private int _teamScoreA = 0;
+    
     public int TeamScoreA
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamScoreAKey]; } catch { }
-            return _teamScoreA;
+            return (int)SimplePhotonNetworkManager.Singleton.GetRoomProperty(TeamScoreAKey);
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient && value != TeamScoreA)
+            if (PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreAKey, value } });
-                _teamScoreA = value;
+                SimplePhotonNetworkManager.Singleton.SetRoomProperty(TeamScoreAKey, value);
             }
         }
     }
-
-    private int _teamScoreB = 0;
+    
     public int TeamScoreB
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamScoreBKey]; } catch { }
-            return _teamScoreB;
+            return (int)SimplePhotonNetworkManager.Singleton.GetRoomProperty(TeamScoreBKey);
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient && value != TeamScoreB)
+            if (PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreBKey, value } });
-                _teamScoreB = value;
+                SimplePhotonNetworkManager.Singleton.SetRoomProperty(TeamScoreBKey, value);
             }
         }
     }
-
-    private int _teamKillA = 0;
+    
     public int TeamKillA
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamKillAKey]; } catch { }
-            return _teamKillA;
+            return (int)SimplePhotonNetworkManager.Singleton.GetRoomProperty(TeamKillAKey);
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient && value != TeamKillA)
+            if (PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamKillAKey, value } });
-                _teamKillA = value;
+                SimplePhotonNetworkManager.Singleton.SetRoomProperty(TeamKillAKey, value);
             }
         }
     }
-
-    private int _teamKillB = 0;
+    
     public int TeamKillB
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamKillBKey]; } catch { }
-            return _teamKillB;
+            return (int)SimplePhotonNetworkManager.Singleton.GetRoomProperty(TeamKillBKey);
         }
         protected set
         {
-            if (PhotonNetwork.IsMasterClient && value != TeamKillB)
+            if (PhotonNetwork.IsMasterClient)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamKillBKey, value } });
-                _teamKillB = value;
+                SimplePhotonNetworkManager.Singleton.SetRoomProperty(TeamKillBKey, value);
             }
         }
     }
@@ -342,7 +312,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         if (matchTimeReduceTimer >= 1 && MatchTimeCountdown > 0)
         {
             matchTimeReduceTimer = 0;
-            MatchTimeCountdown -= 1f;
+            MatchTimeCountdown--;
         }
 
         if (HasOptionMatchTime && MatchTime > 0 && MatchTimeCountdown <= 0 && !IsMatchEnded)

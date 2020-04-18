@@ -63,6 +63,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public byte maxConnections = 10;
     public byte matchMakingConnections = 2;
     public float maxMatchMakingTime = 60f;
+    public float updateRoomPropertyInterval = 1f;
     public string roomName;
     public string roomPassword;
     public SimplePhotonStartPoint[] StartPoints { get; protected set; }
@@ -73,6 +74,10 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     private Hashtable cacheMatchMakingFilters;
     protected bool isQuitting;
     protected bool onlineSceneLoaded;
+
+    private static Dictionary<string, object> roomData = new Dictionary<string, object>();
+    private static Dictionary<string, float> roomDataUpdateTime = new Dictionary<string, float>();
+    private static Dictionary<string, bool> roomDataHasUpdate = new Dictionary<string, bool>();
 
     protected virtual void Awake()
     {
@@ -100,6 +105,41 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         {
             StartGame();
         }
+
+        if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
+        {
+            var time = Time.unscaledTime;
+            var hashTable = new Hashtable();
+            var keys = new List<string>(roomDataUpdateTime.Keys);
+            foreach (var key in keys)
+            {
+                if (roomDataHasUpdate[key] &&
+                    !hashTable.ContainsKey(key) &&
+                    (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(key) ||
+                    !roomData[key].Equals(PhotonNetwork.CurrentRoom.CustomProperties[key])) &&
+                    time - roomDataUpdateTime[key] >= updateRoomPropertyInterval)
+                {
+                    hashTable.Add(key, roomData[key]);
+                }
+            }
+            PhotonNetwork.CurrentRoom.SetCustomProperties(hashTable);
+        }
+    }
+
+    public object GetRoomProperty(string key)
+    {
+        if (PhotonNetwork.IsMasterClient)
+            return roomData[key];
+        else if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(key))
+            return PhotonNetwork.CurrentRoom.CustomProperties[key];
+        return null;
+    }
+
+    public void SetRoomProperty(string key, object value)
+    {
+        roomData[key] = value;
+        roomDataUpdateTime[key] = Time.unscaledTime;
+        roomDataHasUpdate[key] = true;
     }
 
     protected virtual void OnDestroy()
@@ -434,6 +474,9 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
                     onConnectionError.Invoke(cause);
                 break;
         }
+        roomData.Clear();
+        roomDataUpdateTime.Clear();
+        roomDataHasUpdate.Clear();
     }
 
     public override void OnLeftRoom()
