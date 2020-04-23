@@ -128,7 +128,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public object GetRoomProperty(string key)
     {
-        if (PhotonNetwork.IsMasterClient)
+        if (PhotonNetwork.IsMasterClient && roomData.ContainsKey(key))
             return roomData[key];
         else if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(key))
             return PhotonNetwork.CurrentRoom.CustomProperties[key];
