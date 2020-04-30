@@ -178,6 +178,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public virtual void ConnectToMaster()
     {
         isConnectOffline = false;
+        PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV16;
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.OfflineMode = false;
         PhotonNetwork.ConnectToMaster(masterAddress, masterPort, PhotonNetwork.PhotonServerSettings.AppSettings.AppIdRealtime);
@@ -188,6 +189,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public virtual void ConnectToBestCloudServer()
     {
         isConnectOffline = false;
+        PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV18;
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.OfflineMode = false;
         PhotonNetwork.ConnectToBestCloudServer();
@@ -198,6 +200,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public virtual void ConnectToRegion()
     {
         isConnectOffline = false;
+        PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV18;
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.OfflineMode = false;
         PhotonNetwork.ConnectToRegion(region);
@@ -208,6 +211,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public virtual void PlayOffline()
     {
         isConnectOffline = true; // Set the condition to start offline mode when player create game or room.
+        PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV18;
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.OfflineMode = false; // This will turn to be `TRUE` when player create game or room.
         if (onJoinedLobby != null)
