@@ -6,7 +6,6 @@ using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
-[RequireComponent(typeof(PhotonTeamsManager))]
 public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
 {
     public static new BaseNetworkGameManager Singleton
