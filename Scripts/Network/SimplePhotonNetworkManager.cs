@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
 using Photon.Realtime;
-using Photon.Pun.UtilityScripts;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
@@ -178,6 +178,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public virtual void ConnectToMaster()
     {
         isConnectOffline = false;
+        PhotonNetwork.AuthValues = new AuthenticationValues(System.Guid.NewGuid().ToString());
         PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV16;
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.OfflineMode = false;
@@ -570,15 +571,15 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
         isMatchMaking = false;
 
-        StartCoroutine(LoadOnlineScene());
+        LoadOnlineScene();
     }
 
-    protected IEnumerator LoadOnlineScene()
+    async void LoadOnlineScene()
     {
         PhotonNetwork.LoadLevel(onlineScene.SceneName);
         while (PhotonNetwork.LevelLoadingProgress < 1)
         {
-            yield return null;
+            await Task.Yield();
         }
         // Change room state to playing
         Hashtable customProperties = new Hashtable();
@@ -598,11 +599,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         }
         if (PhotonNetwork.IsMasterClient)
         {
-            if (startGameOnRoomCreated)
-            {
-                // If master client joined room, wait for scene change if needed
-                StartCoroutine(MasterWaitOnlineSceneLoaded());
-            }
             if (isMatchMaking)
             {
                 // Set match making state to true for join random filter later
@@ -616,14 +612,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
         if (onJoinedRoom != null)
             onJoinedRoom.Invoke();
-    }
-
-    protected IEnumerator MasterWaitOnlineSceneLoaded()
-    {
-        while (PhotonNetwork.LevelLoadingProgress < 1)
-        {
-            yield return null;
-        }
     }
 
     public override void OnConnectedToMaster()
@@ -693,14 +681,13 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     {
         if (isLog)
             Debug.Log("OnSceneLoaded " + scene.name);
-        StartCoroutine(OnSceneLoadedRoutine(scene, mode));
+        OnSceneLoadedRoutine(scene, mode);
     }
 
-    IEnumerator OnSceneLoadedRoutine(Scene scene, LoadSceneMode mode)
+    async void OnSceneLoadedRoutine(Scene scene, LoadSceneMode mode)
     {
-        yield return null;
         while (!PhotonNetwork.IsMessageQueueRunning)
-            yield return null;
+            await Task.Yield();
         if ((offlineScene.SceneName == onlineScene.SceneName || offlineScene.SceneName != scene.name) && PhotonNetwork.InRoom)
         {
             isMatchMaking = false;
