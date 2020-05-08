@@ -320,6 +320,10 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         MatchTime = matchTime;
         MatchKill = matchKill;
         MatchScore = matchScore;
+        TeamScoreA = 0;
+        TeamScoreB = 0;
+        TeamKillA = 0;
+        TeamKillB = 0;
         MatchTimeCountdown = MatchTime;
         IsMatchEnded = false;
         AddBots();
