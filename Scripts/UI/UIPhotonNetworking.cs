@@ -21,6 +21,7 @@ public class UIPhotonNetworking : UIBase
     public UIPhotonWaitingRoom uiWaitingRoom;
     public UIPhotonEnterPassword uiEnterPassword;
     public UIPhotonNetworkingEntry entryPrefab;
+    public GameObject noEntryObject;
     public Transform gameListContainer;
     private readonly Dictionary<string, UIPhotonNetworkingEntry> entries = new Dictionary<string, UIPhotonNetworkingEntry>();
     private readonly Dictionary<int, string> regions = new Dictionary<int, string>();
@@ -95,6 +96,8 @@ public class UIPhotonNetworking : UIBase
                 entries.Add(key, newEntry);
             }
         }
+        if (noEntryObject != null)
+            noEntryObject.SetActive(entries.Count > 0);
     }
 
     private void OnJoinedLobbyCallback()
