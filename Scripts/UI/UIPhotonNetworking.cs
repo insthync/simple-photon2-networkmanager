@@ -97,7 +97,7 @@ public class UIPhotonNetworking : UIBase
             }
         }
         if (noEntryObject != null)
-            noEntryObject.SetActive(entries.Count > 0);
+            noEntryObject.SetActive(entries.Count <= 0);
     }
 
     private void OnJoinedLobbyCallback()
