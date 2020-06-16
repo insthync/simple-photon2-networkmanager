@@ -762,6 +762,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     [PunRPC]
     protected virtual void RpcAddPlayer()
     {
+        if (playerPrefab == null)
+            return;
         Vector3 position = Vector3.zero;
         var rotation = Quaternion.identity;
         RandomStartPoint(out position, out rotation);
