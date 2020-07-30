@@ -610,8 +610,12 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         Hashtable playerCustomProperties = new Hashtable();
         playerCustomProperties[CUSTOM_PLAYER_STATE] = (byte)PlayerState.NotReady;
         PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
-        if (onJoinedRoom != null)
-            onJoinedRoom.Invoke();
+
+        if (!isMatchMaking)
+        {
+            if (onJoinedRoom != null)
+                onJoinedRoom.Invoke();
+        }
     }
 
     public override void OnConnectedToMaster()
