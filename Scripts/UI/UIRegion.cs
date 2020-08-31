@@ -77,7 +77,7 @@ public class UIRegion : MonoBehaviour
             textRegionCode.text = Data.Code;
 
         if (textRegionName)
-            textRegionName.text = CacheRegionNames[Data.Code];
+            textRegionName.text = CacheRegionNames.ContainsKey(Data.Code) ? CacheRegionNames[Data.Code] : Data.Code;
     }
 
     public void OnClickSelectRegion()
