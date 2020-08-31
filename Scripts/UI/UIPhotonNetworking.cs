@@ -23,7 +23,6 @@ public class UIPhotonNetworking : UIBase
     public UIPhotonNetworkingEntry entryPrefab;
     public GameObject noEntryObject;
     public Transform gameListContainer;
-    private readonly Dictionary<string, UIPhotonNetworkingEntry> entries = new Dictionary<string, UIPhotonNetworkingEntry>();
     private readonly Dictionary<int, string> regions = new Dictionary<int, string>();
 
     private void OnEnable()
@@ -68,26 +67,19 @@ public class UIPhotonNetworking : UIBase
     {
         if (entryPrefab == null || gameListContainer == null)
             return;
-
         for (var i = gameListContainer.childCount - 1; i >= 0; --i)
         {
             var child = gameListContainer.GetChild(i);
             Destroy(child.gameObject);
         }
-        entries.Clear();
         foreach (var data in discoveryData)
         {
-            var key = data.name;
-            if (!entries.ContainsKey(key))
-            {
-                var newEntry = Instantiate(entryPrefab, gameListContainer);
-                newEntry.SetData(data);
-                newEntry.gameObject.SetActive(true);
-                entries.Add(key, newEntry);
-            }
+            var newEntry = Instantiate(entryPrefab, gameListContainer);
+            newEntry.SetData(data);
+            newEntry.gameObject.SetActive(true);
         }
         if (noEntryObject != null)
-            noEntryObject.SetActive(entries.Count <= 0);
+            noEntryObject.SetActive(gameListContainer.childCount <= 0);
     }
 
     private void OnJoinedLobbyCallback()
