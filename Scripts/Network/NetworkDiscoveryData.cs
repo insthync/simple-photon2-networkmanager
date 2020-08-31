@@ -1,5 +1,7 @@
-﻿[System.Serializable]
-public class NetworkDiscoveryData
+﻿using Hashtable = ExitGames.Client.Photon.Hashtable;
+
+[System.Serializable]
+public struct NetworkDiscoveryData
 {
     public string name;
     public string roomName;
@@ -15,4 +17,5 @@ public class NetworkDiscoveryData
     public int matchTime;
     public int matchKill;
     public int matchScore;
+    public Hashtable fullProperties;
 }

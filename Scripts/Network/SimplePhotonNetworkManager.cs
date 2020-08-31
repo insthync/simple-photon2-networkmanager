@@ -440,6 +440,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
                 discoveryData.state = (byte)customProperties[CUSTOM_ROOM_STATE];
                 discoveryData.numPlayers = room.PlayerCount;
                 discoveryData.maxPlayers = room.MaxPlayers;
+                discoveryData.fullProperties = customProperties;
                 foundRooms.Add(discoveryData);
             }
         }

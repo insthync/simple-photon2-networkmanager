@@ -133,6 +133,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                 discoveryData.matchTime = (int)customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_TIME];
                 discoveryData.matchKill = (int)customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_KILL];
                 discoveryData.matchScore = (int)customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_SCORE];
+                discoveryData.fullProperties = customProperties;
                 foundRooms.Add(discoveryData);
             }
         }
