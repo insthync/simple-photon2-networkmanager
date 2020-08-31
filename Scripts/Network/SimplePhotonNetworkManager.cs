@@ -50,6 +50,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public static System.Action<Player, Hashtable> onPlayerPropertiesChanged;
     public static System.Action<Player> onMasterClientSwitched;
     public static System.Action<Hashtable> onCustomRoomPropertiesChanged;
+    public static System.Action<RegionHandler> onRegionListReceived;
 
     public bool isLog;
     public SceneNameField offlineScene;
@@ -679,6 +680,13 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         if (isLog) Debug.Log("OnPhotonCustomRoomPropertiesChanged " + propertiesThatChanged.ToStringFull());
         if (onCustomRoomPropertiesChanged != null)
             onCustomRoomPropertiesChanged.Invoke(propertiesThatChanged);
+    }
+
+    public override void OnRegionListReceived(RegionHandler regionHandler)
+    {
+        if (isLog) Debug.Log("OnRegionListReceived");
+        if (onRegionListReceived != null)
+            onRegionListReceived.Invoke(regionHandler);
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
