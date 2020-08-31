@@ -41,9 +41,9 @@ public class UIPhotonWaitingRoom : UIBase
     private readonly Dictionary<string, UIPhotonWaitingPlayer> waitingTeamAPlayers = new Dictionary<string, UIPhotonWaitingPlayer>();
     private readonly Dictionary<string, UIPhotonWaitingPlayer> waitingTeamBPlayers = new Dictionary<string, UIPhotonWaitingPlayer>();
 
-    public override void Show()
+
+    private void OnEnable()
     {
-        base.Show();
         SimplePhotonNetworkManager.onJoinedRoom += OnJoinedRoomCallback;
         SimplePhotonNetworkManager.onPlayerConnected += OnPlayerConnectedCallback;
         SimplePhotonNetworkManager.onPlayerDisconnected += OnPlayerDisconnectedCallback;
@@ -53,18 +53,7 @@ public class UIPhotonWaitingRoom : UIBase
         OnJoinedRoomCallback();
     }
 
-    public override void Hide()
-    {
-        base.Hide();
-        SimplePhotonNetworkManager.onJoinedRoom -= OnJoinedRoomCallback;
-        SimplePhotonNetworkManager.onPlayerConnected -= OnPlayerConnectedCallback;
-        SimplePhotonNetworkManager.onPlayerDisconnected -= OnPlayerDisconnectedCallback;
-        SimplePhotonNetworkManager.onPlayerPropertiesChanged -= OnPlayerPropertiesChangedCallback;
-        SimplePhotonNetworkManager.onCustomRoomPropertiesChanged -= OnCustomRoomPropertiesChangedCallback;
-        SimplePhotonNetworkManager.onMasterClientSwitched -= OnMasterClientSwitchedCallback;
-    }
-
-    private void OnDestroy()
+    private void OnDisable()
     {
         SimplePhotonNetworkManager.onJoinedRoom -= OnJoinedRoomCallback;
         SimplePhotonNetworkManager.onPlayerConnected -= OnPlayerConnectedCallback;

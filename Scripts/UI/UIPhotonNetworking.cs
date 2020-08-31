@@ -64,16 +64,6 @@ public class UIPhotonNetworking : UIBase
         SimplePhotonNetworkManager.onConnectionError -= OnConnectionErrorCallback;
     }
 
-    private void OnDestroy()
-    {
-        SimplePhotonNetworkManager.onReceivedRoomListUpdate -= OnReceivedRoomListUpdateCallback;
-        SimplePhotonNetworkManager.onJoinedLobby -= OnJoinedLobbyCallback;
-        SimplePhotonNetworkManager.onJoinedRoom -= OnJoinedRoomCallback;
-        SimplePhotonNetworkManager.onLeftRoom -= OnLeftRoomCallback;
-        SimplePhotonNetworkManager.onDisconnected -= OnDisconnectedCallback;
-        SimplePhotonNetworkManager.onConnectionError -= OnConnectionErrorCallback;
-    }
-
     private void OnReceivedRoomListUpdateCallback(List<NetworkDiscoveryData> discoveryData)
     {
         if (entryPrefab == null || gameListContainer == null)
