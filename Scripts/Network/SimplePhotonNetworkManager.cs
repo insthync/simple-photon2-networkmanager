@@ -204,6 +204,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void ConnectToRegion()
     {
+        if (isLog) Debug.Log("Connecting to region " + region);
         isConnectOffline = false;
         PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV18;
         PhotonNetwork.AutomaticallySyncScene = true;
@@ -646,11 +647,13 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnConnectedToMaster()
     {
-        if (isLog) Debug.Log("OnConnectedToMaster");
+        if (isLog) Debug.Log("OnConnectedToMaster " + PhotonNetwork.CloudRegion);
         if (onConnectedToMaster != null)
             onConnectedToMaster.Invoke();
         if (isConnectOffline)
+        {
             PhotonNetwork.JoinRandomRoom();
+        }
         else
         {
             PhotonNetwork.JoinLobby();
