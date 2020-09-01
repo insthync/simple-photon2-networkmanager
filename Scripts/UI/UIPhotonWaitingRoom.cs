@@ -10,6 +10,7 @@ using PlayerState = SimplePhotonNetworkManager.PlayerState;
 
 public class UIPhotonWaitingRoom : UIBase
 {
+    public Text textName;
     public Text textRoomName;
     public Text textPlayerName;
     public Text textSceneName;
@@ -89,6 +90,8 @@ public class UIPhotonWaitingRoom : UIBase
         if (customProperties.TryGetValue(SimplePhotonNetworkManager.CUSTOM_ROOM_STATE, out tempObj))
             state = (byte)tempObj;
 
+        if (textName != null)
+            textName.text = room.Name;
         if (textRoomName != null)
             textRoomName.text = string.IsNullOrEmpty(roomName) ? "Untitled" : roomName;
         if (textPlayerName != null)
