@@ -1,4 +1,5 @@
-﻿using Photon.Realtime;
+﻿using Photon.Pun;
+using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,7 +13,7 @@ public class UIRegionEntry : MonoBehaviour
         public string code;
         public string name;
     }
-
+    public GameObject currentSign;
     public GameObject lowPingSign;
     public Color lowPingColor = Color.green;
     public int highPing = 100;
@@ -23,8 +24,25 @@ public class UIRegionEntry : MonoBehaviour
     public Color veryHighPingColor = Color.red;
     public Text textPing;
     public Text textRegionCode;
-    public RegionName[] regionNames;
+    public RegionName[] regionNames = new RegionName[]
+    {
+        new RegionName() { code = "asia", name = "Asia" },
+        new RegionName() { code = "au", name = "Australia" },
+        new RegionName() { code = "cae", name = "Canada, East" },
+        new RegionName() { code = "cn", name = "Chinese Mainland" },
+        new RegionName() { code = "eu", name = "Europe" },
+        new RegionName() { code = "in", name = "India" },
+        new RegionName() { code = "jp", name = "Japan" },
+        new RegionName() { code = "ru", name = "Russia" },
+        new RegionName() { code = "rue", name = "Russia, East" },
+        new RegionName() { code = "za", name = "South Africa" },
+        new RegionName() { code = "sa", name = "South America" },
+        new RegionName() { code = "kr", name = "South Korea" },
+        new RegionName() { code = "us", name = "USA, East" },
+        new RegionName() { code = "usw", name = "USA, West" },
+    };
     public Text textRegionName;
+    public bool showCurrentRegion;
     public Region Data { get; private set; }
 
     private Dictionary<string, string> cacheRegionNames;
@@ -46,6 +64,12 @@ public class UIRegionEntry : MonoBehaviour
 
     private void Update()
     {
+        if (showCurrentRegion && SimplePhotonNetworkManager.EnabledRegions.ContainsKey(PhotonNetwork.CloudRegion))
+        {
+            Data = null;
+            SetData(SimplePhotonNetworkManager.EnabledRegions[PhotonNetwork.CloudRegion]);
+        }
+
         if (Data == null)
             return;
 
@@ -60,7 +84,7 @@ public class UIRegionEntry : MonoBehaviour
 
         if (textPing)
         {
-            textPing.text = Data.WasPinged ? Data.Ping.ToString("N0") : "N/A";
+            textPing.text = Data.WasPinged ? Data.Ping.ToString("N0") + "ms" : "N/A";
             textPing.color = lowPingColor;
             if (Data.Ping >= highPing)
                 textPing.color = highPingColor;
@@ -72,6 +96,9 @@ public class UIRegionEntry : MonoBehaviour
     public void SetData(Region data)
     {
         Data = data;
+
+        if (currentSign)
+            currentSign.SetActive(PhotonNetwork.CloudRegion.Equals(Data.Code));
 
         if (textRegionCode)
             textRegionCode.text = Data.Code;
