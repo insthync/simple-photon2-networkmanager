@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class UIPhotonNetworking : UIBase
 {
@@ -24,6 +25,8 @@ public class UIPhotonNetworking : UIBase
     public GameObject noEntryObject;
     public Transform gameListContainer;
     private readonly Dictionary<int, string> regions = new Dictionary<int, string>();
+    private readonly List<NetworkDiscoveryData> discoveryList = new List<NetworkDiscoveryData>();
+    private Hashtable discoveryFilters;
 
     private void OnEnable()
     {
@@ -63,7 +66,20 @@ public class UIPhotonNetworking : UIBase
         SimplePhotonNetworkManager.onConnectionError -= OnConnectionErrorCallback;
     }
 
-    private void OnReceivedRoomListUpdateCallback(List<NetworkDiscoveryData> discoveryData)
+    private void OnReceivedRoomListUpdateCallback(List<NetworkDiscoveryData> list)
+    {
+        discoveryList.Clear();
+        discoveryList.AddRange(list);
+        CreateRoomList();
+    }
+
+    public void FilterDiscovery(Hashtable filters)
+    {
+        discoveryFilters = filters;
+        CreateRoomList();
+    }
+
+    private void CreateRoomList()
     {
         if (entryPrefab == null || gameListContainer == null)
             return;
@@ -72,14 +88,31 @@ public class UIPhotonNetworking : UIBase
             var child = gameListContainer.GetChild(i);
             Destroy(child.gameObject);
         }
-        foreach (var data in discoveryData)
+        foreach (var data in discoveryList)
         {
+            if (!PassDiscoveryFilters(data.fullProperties)) continue;
             var newEntry = Instantiate(entryPrefab, gameListContainer);
             newEntry.SetData(data);
             newEntry.gameObject.SetActive(true);
         }
         if (noEntryObject != null)
             noEntryObject.SetActive(gameListContainer.childCount <= 0);
+    }
+
+    private bool PassDiscoveryFilters(Hashtable properties)
+    {
+        if (discoveryFilters == null || discoveryFilters.Count == 0)
+            return true;
+        foreach (var key in discoveryFilters.Keys)
+        {
+            if (properties == null ||
+                !properties.ContainsKey(key) ||
+                !properties[key].Equals(discoveryFilters[key]))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void OnJoinedLobbyCallback()
