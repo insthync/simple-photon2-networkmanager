@@ -524,6 +524,13 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         OnStopMatchMaking();
     }
 
+    public override void OnJoinRoomFailed(short code, string msg)
+    {
+        if (isLog) Debug.Log("OnJoinRoomFailed " + code + " " + msg);
+        if (onRoomConnectError != null)
+            onRoomConnectError.Invoke(code, msg);
+    }
+
     public override void OnJoinRandomFailed(short code, string msg)
     {
         if (isLog) Debug.Log("OnJoinRandomFailed " + code + " " + msg);
