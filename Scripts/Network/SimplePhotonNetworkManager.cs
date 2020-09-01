@@ -65,6 +65,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public byte matchMakingConnections = 2;
     public float maxMatchMakingTime = 60f;
     public float updateRoomPropertyInterval = 1f;
+    public bool randomAlphaNumericName = true;
+    public int alphaNumericNameLength = 8;
     public string roomName;
     public string roomPassword;
     public SimplePhotonStartPoint[] StartPoints { get; protected set; }
@@ -79,6 +81,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     private static Dictionary<string, object> roomData = new Dictionary<string, object>();
     private static Dictionary<string, float> roomDataUpdateTime = new Dictionary<string, float>();
     private static Dictionary<string, bool> roomDataHasUpdate = new Dictionary<string, bool>();
+    public static readonly Dictionary<string, Region> EnabledRegions = new Dictionary<string, Region>();
 
     protected virtual void Awake()
     {
@@ -256,13 +259,27 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         isMatchMaking = false;
     }
 
+    public string GenerateName()
+    {
+        if (randomAlphaNumericName)
+        {
+            string name = string.Empty;
+            for (int i = 0; i < alphaNumericNameLength; ++i)
+            {
+                name += Random.Range(0, 9);
+            }
+            return name;
+        }
+        return string.Empty;
+    }
+
     private void SetupAndCreateRoom()
     {
         var roomOptions = new RoomOptions();
         roomOptions.CustomRoomPropertiesForLobby = GetCustomRoomPropertiesForLobby();
         roomOptions.MaxPlayers = maxConnections;
         roomOptions.PublishUserId = true;
-        PhotonNetwork.CreateRoom(string.Empty, roomOptions, null);
+        PhotonNetwork.CreateRoom(GenerateName(), roomOptions, null);
     }
 
     protected virtual string[] GetCustomRoomPropertiesForLobby()
@@ -315,7 +332,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         roomOptions.CustomRoomPropertiesForLobby = GetCustomRoomPropertiesForLobby();
         roomOptions.MaxPlayers = maxConnections;
         roomOptions.PublishUserId = true;
-        PhotonNetwork.CreateRoom(string.Empty, roomOptions, null);
+        PhotonNetwork.CreateRoom(GenerateName(), roomOptions, null);
     }
 
     public void StopMatchMaking()
@@ -686,6 +703,11 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public override void OnRegionListReceived(RegionHandler regionHandler)
     {
         if (isLog) Debug.Log("OnRegionListReceived");
+        EnabledRegions.Clear();
+        foreach (var region in regionHandler.EnabledRegions)
+        {
+            EnabledRegions[region.Code] = region;
+        }
         if (onRegionListReceived != null)
             onRegionListReceived.Invoke(regionHandler);
     }
