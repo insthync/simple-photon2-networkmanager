@@ -64,14 +64,21 @@ public class UIRegionEntry : MonoBehaviour
 
     private void Update()
     {
-        if (showCurrentRegion && SimplePhotonNetworkManager.EnabledRegions.ContainsKey(PhotonNetwork.CloudRegion))
+        var currentRegion = string.Empty;
+        if (!string.IsNullOrEmpty(PhotonNetwork.CloudRegion))
+            currentRegion = PhotonNetwork.CloudRegion.TrimEnd('/', '*');
+
+        if (showCurrentRegion && SimplePhotonNetworkManager.EnabledRegions.ContainsKey(currentRegion))
         {
             Data = null;
-            SetData(SimplePhotonNetworkManager.EnabledRegions[PhotonNetwork.CloudRegion]);
+            SetData(SimplePhotonNetworkManager.EnabledRegions[currentRegion]);
         }
 
         if (Data == null)
             return;
+
+        if (currentSign)
+            currentSign.SetActive(currentRegion.Equals(Data.Code));
 
         if (lowPingSign)
             lowPingSign.SetActive(Data.Ping < highPing);
@@ -96,9 +103,6 @@ public class UIRegionEntry : MonoBehaviour
     public void SetData(Region data)
     {
         Data = data;
-
-        if (currentSign)
-            currentSign.SetActive(PhotonNetwork.CloudRegion.Equals(Data.Code));
 
         if (textRegionCode)
             textRegionCode.text = Data.Code;
