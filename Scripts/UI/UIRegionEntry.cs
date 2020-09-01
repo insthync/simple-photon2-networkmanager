@@ -110,6 +110,7 @@ public class UIRegionEntry : MonoBehaviour
     public void OnClickSelectRegion()
     {
         SimplePhotonNetworkManager.Singleton.region = Data.Code;
+        SimplePhotonNetworkManager.Singleton.Disconnect();
         SimplePhotonNetworkManager.Singleton.ConnectToRegion();
     }
 }
