@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIRegion : MonoBehaviour
+public class UIRegionEntry : MonoBehaviour
 {
     [System.Serializable]
     public struct RegionName
