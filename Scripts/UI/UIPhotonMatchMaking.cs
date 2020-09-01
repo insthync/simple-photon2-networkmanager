@@ -102,7 +102,10 @@ public class UIPhotonMatchMaking : UIBase
             var filter = filters[selectedFilter];
             // Filter scene
             if (filter.onlineScene != null)
+            {
+                SimplePhotonNetworkManager.Singleton.onlineScene = filter.onlineScene;
                 result[SimplePhotonNetworkManager.CUSTOM_ROOM_SCENE_NAME] = filter.onlineScene.SceneName;
+            }
             // Filter gameplay rule
             if (filter.gameplayRule != null && BaseNetworkGameInstance.GameRules.ContainsKey(filter.gameplayRule.name))
                 result[BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE] = filter.gameplayRule.name;
