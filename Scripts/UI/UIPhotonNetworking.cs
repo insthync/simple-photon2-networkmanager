@@ -201,6 +201,11 @@ public class UIPhotonNetworking : UIBase
         networkManager.Disconnect();
     }
 
+    public virtual void OnClickCreateRoom()
+    {
+        SimplePhotonNetworkManager.Singleton.CreateRoom();
+    }
+
     public virtual void OnClickCreateWaitingRoom()
     {
         SimplePhotonNetworkManager.Singleton.CreateWaitingRoom();
