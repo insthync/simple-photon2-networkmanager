@@ -11,6 +11,7 @@ public class UIRegionList : UIBase
 
     private void OnEnable()
     {
+        FillRegionList();
         SimplePhotonNetworkManager.onRegionListReceived += OnRegionListReceived;
     }
 
@@ -21,6 +22,11 @@ public class UIRegionList : UIBase
 
     public void OnRegionListReceived(RegionHandler regionHandler)
     {
+        FillRegionList();
+    }
+
+    public void FillRegionList()
+    {
         if (entryPrefab == null || regionListContainer == null)
             return;
         for (var i = regionListContainer.childCount - 1; i >= 0; --i)
@@ -28,7 +34,7 @@ public class UIRegionList : UIBase
             var child = regionListContainer.GetChild(i);
             Destroy(child.gameObject);
         }
-        foreach (var data in regionHandler.EnabledRegions)
+        foreach (var data in SimplePhotonNetworkManager.EnabledRegions.Values)
         {
             var newEntry = Instantiate(entryPrefab, regionListContainer);
             newEntry.SetData(data);
