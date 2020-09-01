@@ -777,8 +777,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     {
         if (playerPrefab == null)
             return;
-        Vector3 position = Vector3.zero;
-        var rotation = Quaternion.identity;
+        Vector3 position;
+        Quaternion rotation;
         RandomStartPoint(out position, out rotation);
         PhotonNetwork.Instantiate(playerPrefab.name, position, rotation, 0);
     }
