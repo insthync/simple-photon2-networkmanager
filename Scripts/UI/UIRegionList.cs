@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class UIRegionList : UIBase
 {
-    public UIRegion entryPrefab;
+    public UIRegionEntry entryPrefab;
     public GameObject noEntryObject;
     public Transform regionListContainer;
 
