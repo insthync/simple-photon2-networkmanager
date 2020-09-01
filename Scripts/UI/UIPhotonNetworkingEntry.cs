@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class UIPhotonNetworkingEntry : MonoBehaviour
 {
+    public Text textName;
     public Text textRoomName;
     public Text textPlayerName;
     public Text textSceneName;
@@ -23,6 +24,8 @@ public class UIPhotonNetworkingEntry : MonoBehaviour
     public void SetData(NetworkDiscoveryData data)
     {
         Data = data;
+        if (textName != null)
+            textName.text = data.name;
         if (textRoomName != null)
             textRoomName.text = string.IsNullOrEmpty(data.roomName) ? "Untitled" : data.roomName;
         if (textPlayerName != null)
