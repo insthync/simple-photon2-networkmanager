@@ -82,7 +82,6 @@ public class UIPhotonNetworkingEntry : MonoBehaviour
 
     public virtual void OnClickJoinButton()
     {
-        var networkManager = SimplePhotonNetworkManager.Singleton;
-        networkManager.JoinRoom(Data.name);
+        SimplePhotonNetworkManager.Singleton.JoinRoom(Data.name);
     }
 }
