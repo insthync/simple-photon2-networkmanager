@@ -81,6 +81,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     private static Dictionary<string, object> roomData = new Dictionary<string, object>();
     private static Dictionary<string, float> roomDataUpdateTime = new Dictionary<string, float>();
     private static Dictionary<string, bool> roomDataHasUpdate = new Dictionary<string, bool>();
+    public static readonly Dictionary<string, NetworkDiscoveryData> Rooms = new Dictionary<string, NetworkDiscoveryData>();
     public static readonly Dictionary<string, Region> EnabledRegions = new Dictionary<string, Region>();
 
     protected virtual void Awake()
@@ -302,7 +303,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         StartMatchMaking(null);
     }
 
-    public void StartMatchMaking(Hashtable filters)
+    public virtual void StartMatchMaking(Hashtable filters)
     {
         if (isMatchMaking)
         {
@@ -396,7 +397,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void JoinRoom(string roomName)
+    public virtual void JoinRoom(string roomName)
     {
         PhotonNetwork.JoinRoom(roomName);
         if (onJoiningRoom != null)
@@ -408,7 +409,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         JoinRandomRoom(null);
     }
 
-    public void JoinRandomRoom(Hashtable filter)
+    public virtual void JoinRandomRoom(Hashtable filter)
     {
         if (filter == null)
             filter = new Hashtable();
@@ -439,7 +440,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnRoomListUpdate(List<RoomInfo> rooms)
     {
-        var foundRooms = new List<NetworkDiscoveryData>();
+        Rooms.Clear();
         foreach (var room in rooms)
         {
             var customProperties = room.CustomProperties;
@@ -459,11 +460,11 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
                 discoveryData.numPlayers = room.PlayerCount;
                 discoveryData.maxPlayers = room.MaxPlayers;
                 discoveryData.fullProperties = customProperties;
-                foundRooms.Add(discoveryData);
+                Rooms[discoveryData.name] = discoveryData;
             }
         }
         if (onReceivedRoomListUpdate != null)
-            onReceivedRoomListUpdate.Invoke(foundRooms);
+            onReceivedRoomListUpdate.Invoke(new List<NetworkDiscoveryData>(Rooms.Values));
     }
 
     protected void OnApplicationQuit()
