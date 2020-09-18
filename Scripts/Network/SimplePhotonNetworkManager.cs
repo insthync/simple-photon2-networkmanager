@@ -56,6 +56,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public SceneNameField offlineScene;
     public SceneNameField onlineScene;
     public GameObject playerPrefab;
+    public string saveSelectedRegionKey = "SAVE_SELECTED_REGION";
     public string gameVersion = "1";
     public string masterAddress = "localhost";
     public int masterPort = 5055;
@@ -75,6 +76,9 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public float startMatchMakingTime { get; protected set; }
     private bool startGameOnRoomCreated;
     private Hashtable cacheMatchMakingFilters;
+    protected bool isConnectingToBestRegion;
+    protected bool isConnectedToBestRegion;
+    protected bool isConnectingToSelectedRegion;
     protected bool isQuitting;
     protected bool onlineSceneLoaded;
 
@@ -176,7 +180,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         {
             return;
         }
-
         PhotonNetwork.SetMasterClient(PhotonNetwork.MasterClient.GetNext());
     }
 
@@ -195,10 +198,13 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public virtual void ConnectToBestCloudServer()
     {
         isConnectOffline = false;
+        // Delete saved best region, to re-ping all regions, to fix unknow ping problem
+        ServerSettings.ResetBestRegionCodeInPreferences();
         PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV18;
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.OfflineMode = false;
         PhotonNetwork.ConnectToBestCloudServer();
+        isConnectingToBestRegion = true;
         if (onConnectingToMaster != null)
             onConnectingToMaster.Invoke();
     }
@@ -206,13 +212,31 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public virtual void ConnectToRegion()
     {
         if (isLog) Debug.Log("Connecting to region " + region);
-        isConnectOffline = false;
-        PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV18;
-        PhotonNetwork.AutomaticallySyncScene = true;
-        PhotonNetwork.OfflineMode = false;
-        PhotonNetwork.ConnectToRegion(region);
-        if (onConnectingToMaster != null)
-            onConnectingToMaster.Invoke();
+        // Hacking PUN, It seems like PUN won't connect to name server when call `PhotonNetwork.ConnectToRegion()`
+        // Have to connect to best cloud server to make it connect to name server to get all regions list
+        if (!isConnectedToBestRegion)
+        {
+            // If not connected to best region once, connect to best region to ping all regions
+            ConnectToBestCloudServer();
+            isConnectingToSelectedRegion = true;
+        }
+        else
+        {
+            // It's ready to connect to selected region because it was connected to best region once and pinged all regions
+            PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV18;
+            PhotonNetwork.AutomaticallySyncScene = true;
+            PhotonNetwork.OfflineMode = false;
+            PhotonNetwork.ConnectToRegion(region);
+        }
+    }
+
+    public virtual void ConnectToSavedCloudServer()
+    {
+        region = PlayerPrefs.GetString(saveSelectedRegionKey, string.Empty);
+        if (string.IsNullOrEmpty(region))
+            ConnectToBestCloudServer();
+        else
+            ConnectToRegion();
     }
 
     public virtual void PlayOffline()
@@ -657,9 +681,25 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            PhotonNetwork.JoinLobby();
-            if (onJoiningLobby != null)
-                onJoiningLobby.Invoke();
+            PlayerPrefs.SetString(saveSelectedRegionKey, PhotonNetwork.CloudRegion.TrimEnd('/', '*'));
+            PlayerPrefs.Save();
+            if (isConnectingToBestRegion)
+            {
+                isConnectingToBestRegion = false;
+                isConnectedToBestRegion = true;
+            }
+            if (isConnectingToSelectedRegion)
+            {
+                isConnectingToSelectedRegion = false;
+                PhotonNetwork.Disconnect();
+                ConnectToRegion();
+            }
+            else
+            {
+                PhotonNetwork.JoinLobby();
+                if (onJoiningLobby != null)
+                    onJoiningLobby.Invoke();
+            }
         }
     }
 
