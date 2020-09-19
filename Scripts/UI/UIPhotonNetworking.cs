@@ -54,6 +54,9 @@ public class UIPhotonNetworking : UIBase
         SimplePhotonNetworkManager.onLeftRoom += OnLeftRoomCallback;
         SimplePhotonNetworkManager.onDisconnected += OnDisconnectedCallback;
         SimplePhotonNetworkManager.onConnectionError += OnConnectionErrorCallback;
+        discoveryList.Clear();
+        discoveryList.AddRange(SimplePhotonNetworkManager.Rooms.Values);
+        CreateRoomList();
     }
 
     private void OnDisable()
@@ -69,7 +72,7 @@ public class UIPhotonNetworking : UIBase
     private void OnReceivedRoomListUpdateCallback(List<NetworkDiscoveryData> list)
     {
         discoveryList.Clear();
-        discoveryList.AddRange(list);
+        discoveryList.AddRange(SimplePhotonNetworkManager.Rooms.Values);
         CreateRoomList();
     }
 
