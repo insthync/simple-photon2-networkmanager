@@ -56,7 +56,7 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
                 if (value > score && NetworkManager != null)
                     NetworkManager.OnScoreIncrease(this, value - score);
                 _score = value;
-                photonView.RPC("RpcUpdateScore", RpcTarget.Others, value);
+                photonView.OthersRPC(RpcUpdateScore, value);
             }
         }
     }
@@ -70,7 +70,7 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
                 if (value > killCount && NetworkManager != null)
                     NetworkManager.OnKillIncrease(this, value - killCount);
                 _killCount = value;
-                photonView.RPC("RpcUpdateKillCount", RpcTarget.Others, value);
+                photonView.OthersRPC(RpcUpdateKillCount, value);
             }
         }
     }
@@ -82,7 +82,7 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
             if (PhotonNetwork.IsMasterClient && value != assistCount)
             {
                 _assistCount = value;
-                photonView.RPC("RpcUpdateAssistCount", RpcTarget.Others, value);
+                photonView.OthersRPC(RpcUpdateAssistCount, value);
             }
         }
     }
@@ -94,7 +94,7 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
             if (PhotonNetwork.IsMasterClient && value != dieCount)
             {
                 _dieCount = value;
-                photonView.RPC("RpcUpdateDieCount", RpcTarget.Others, value);
+                photonView.OthersRPC(RpcUpdateDieCount, value);
             }
         }
     }
@@ -174,20 +174,20 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
     {
         if (!PhotonNetwork.IsMasterClient)
             return;
-        photonView.RPC("RpcUpdateScore", RpcTarget.Others, score);
-        photonView.RPC("RpcUpdateKillCount", RpcTarget.Others, killCount);
-        photonView.RPC("RpcUpdateAssistCount", RpcTarget.Others, assistCount);
-        photonView.RPC("RpcUpdateDieCount", RpcTarget.Others, dieCount);
+        photonView.OthersRPC(RpcUpdateScore, score);
+        photonView.OthersRPC(RpcUpdateKillCount, killCount);
+        photonView.OthersRPC(RpcUpdateAssistCount, assistCount);
+        photonView.OthersRPC(RpcUpdateDieCount, dieCount);
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         if (!PhotonNetwork.IsMasterClient)
             return;
-        photonView.RPC("RpcUpdateScore", newPlayer, score);
-        photonView.RPC("RpcUpdateKillCount", newPlayer, killCount);
-        photonView.RPC("RpcUpdateAssistCount", newPlayer, assistCount);
-        photonView.RPC("RpcUpdateDieCount", newPlayer, dieCount);
+        photonView.TargetRPC(RpcUpdateScore, newPlayer, score);
+        photonView.TargetRPC(RpcUpdateKillCount, newPlayer, killCount);
+        photonView.TargetRPC(RpcUpdateAssistCount, newPlayer, assistCount);
+        photonView.TargetRPC(RpcUpdateDieCount, newPlayer, dieCount);
     }
 
     protected virtual void OnStartServer()

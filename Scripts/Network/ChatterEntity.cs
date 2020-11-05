@@ -54,7 +54,7 @@ public class ChatterEntity : MonoBehaviourPunCallbacks
     
     public void CmdSendChat(string message)
     {
-        photonView.RPC("RpcShowChat", RpcTarget.AllViaServer, message);
+        photonView.AllRPC(RpcShowChat, message);
     }
 
     [PunRPC]
@@ -74,7 +74,7 @@ public class ChatterEntity : MonoBehaviourPunCallbacks
     
     public void CmdSendEmoticon(int id)
     {
-        photonView.RPC("RpcShowEmoticon", RpcTarget.AllViaServer, id);
+        photonView.AllRPC(RpcShowEmoticon, id);
     }
 
     [PunRPC]

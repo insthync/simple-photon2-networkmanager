@@ -159,7 +159,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                 if (isConnectOffline)
                     RpcUpdateScores(length, objects.ToArray());
                 else
-                    photonView.RPC("RpcUpdateScores", RpcTarget.All, length, objects.ToArray());
+                    photonView.AllRPC(RpcUpdateScores, length, objects.ToArray());
             }
             updateScoreTime = Time.unscaledTime;
         }
@@ -170,7 +170,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
             if (isConnectOffline)
                 RpcMatchStatus(gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
             else
-                photonView.RPC("RpcMatchStatus", RpcTarget.All, gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
+                photonView.AllRPC(RpcMatchStatus, gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
 
             if (!IsMatchEnded && gameRule.IsMatchEnded)
             {
@@ -192,7 +192,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         if (!PhotonNetwork.IsMasterClient)
             return;
 
-        photonView.RPC("RpcKillNotify", RpcTarget.All, killerName, victimName, weaponId);
+        photonView.AllRPC(RpcKillNotify, killerName, victimName, weaponId);
     }
 
     public NetworkGameScore[] GetSortedScores()
@@ -383,9 +383,9 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                 int length = 0;
                 List<object> objects;
                 GetSortedScoresAsObjects(out length, out objects);
-                photonView.RPC("RpcUpdateScores", newPlayer, length, objects.ToArray());
+                photonView.TargetRPC(RpcUpdateScores, newPlayer, length, objects.ToArray());
                 if (gameRule != null)
-                    photonView.RPC("RpcMatchStatus", newPlayer, gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
+                    photonView.TargetRPC(RpcMatchStatus, newPlayer, gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
                 // Adjust bots
                 gameRule.AdjustBots();
             }
@@ -432,7 +432,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
 
     public void ChangePlayerTeam()
     {
-        photonView.RPC("RpcChangePlayerTeam", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.UserId);
+        photonView.MasterRPC(RpcChangePlayerTeam, PhotonNetwork.LocalPlayer.UserId);
     }
 
     [PunRPC]

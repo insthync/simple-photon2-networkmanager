@@ -779,7 +779,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             isMatchMaking = false;
             // Send client ready to spawn player at master client
             OnOnlineSceneChanged();
-            photonView.RPC("RpcPlayerSceneChanged", RpcTarget.MasterClient, PhotonNetwork.LocalPlayer.UserId);
+            photonView.MasterRPC(RpcPlayerSceneChanged, PhotonNetwork.LocalPlayer.UserId);
         }
     }
 
@@ -861,7 +861,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     {
         Player foundPlayer = GetPlayerById(id);
         if (foundPlayer != null)
-            photonView.RPC("RpcAddPlayer", foundPlayer);
+            photonView.TargetRPC(RpcAddPlayer, foundPlayer);
     }
 
     public bool RandomStartPoint(out Vector3 position, out Quaternion rotation)
