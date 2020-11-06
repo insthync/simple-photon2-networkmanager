@@ -69,6 +69,12 @@ public class UIPhotonNetworking : UIBase
         SimplePhotonNetworkManager.onConnectionError -= OnConnectionErrorCallback;
     }
 
+    private void Update()
+    {
+        if (noEntryObject != null)
+            noEntryObject.SetActive(gameListContainer == null || gameListContainer.childCount <= 0);
+    }
+
     private void OnReceivedRoomListUpdateCallback(List<NetworkDiscoveryData> list)
     {
         discoveryList.Clear();
@@ -98,8 +104,6 @@ public class UIPhotonNetworking : UIBase
             newEntry.SetData(data);
             newEntry.gameObject.SetActive(true);
         }
-        if (noEntryObject != null)
-            noEntryObject.SetActive(gameListContainer.childCount <= 0);
     }
 
     private bool PassDiscoveryFilters(Hashtable properties)
