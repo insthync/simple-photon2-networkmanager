@@ -58,7 +58,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     public abstract bool CanCharacterRespawn(BaseNetworkGameCharacter character, params object[] extraParams);
     public abstract bool RespawnCharacter(BaseNetworkGameCharacter character, params object[] extraParams);
 
-    protected BaseNetworkGameCharacter[] Bots { get { return FindObjectsOfType<BotEntity>(); } }
+    protected BaseNetworkGameCharacter[] Bots { get { return FindObjectsOfType<BaseNetworkGameCharacter>(); } }
     protected readonly Dictionary<int, int> CharacterCollectedScore = new Dictionary<int, int>();
     protected readonly Dictionary<int, int> CharacterCollectedKill = new Dictionary<int, int>();
 

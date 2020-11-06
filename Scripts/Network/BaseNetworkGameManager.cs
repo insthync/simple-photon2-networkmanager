@@ -510,10 +510,10 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     {
         countA = 0;
         countB = 0;
-        var characters = FindObjectsOfType<CharacterEntity>();
+        var characters = FindObjectsOfType<BaseNetworkGameCharacter>();
         for (int i = 0; i < characters.Length; ++i)
         {
-            if (characters[i] is MonsterEntity) continue;
+            if (characters[i].IsBot) continue;
             if (characters[i].playerTeam == 1)
                 countA++;
             if (characters[i].playerTeam == 2)

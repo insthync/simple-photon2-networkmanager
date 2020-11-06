@@ -15,6 +15,7 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
     public GameObject[] teamBObjects;
 
     public abstract bool IsDead { get; }
+    public abstract bool IsBot { get; }
 
     protected int _score;
     protected int _killCount;
