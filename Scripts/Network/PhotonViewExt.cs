@@ -2,7 +2,7 @@
 
 namespace Photon.Pun
 {
-    public static class PhotonViewExtension
+    public static class PhotonViewExt
     {
         public delegate void RPCDelegate();
         public delegate void RPCDelegate<T1>(T1 param1);
