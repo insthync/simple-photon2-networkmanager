@@ -416,17 +416,13 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         }
         else
         {
-            // TODO: Improve team codes
-            Player[] players1;
-            Player[] players2;
-            if (Teams.TryGetTeamMembers(1, out players1) &&
-                Teams.TryGetTeamMembers(2, out players2))
-            {
-                if (players1.Length > players2.Length)
-                    player.JoinOrSwitchTeam(2);
-                else
-                    player.JoinOrSwitchTeam(1);
-            }
+            int countA;
+            int countB;
+            CountCharacters(out countA, out countB);
+            if (countA > countB)
+                player.JoinOrSwitchTeam(2);
+            else
+                player.JoinOrSwitchTeam(1);
         }
     }
 
@@ -482,35 +478,46 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
             else
             {
                 var maxPlayerEachTeam = PhotonNetwork.CurrentRoom.MaxPlayers / 2;
-                // TODO: Improve team codes
-                Player[] players1;
-                Player[] players2;
-                if (Teams.TryGetTeamMembers(1, out players1) &&
-                    Teams.TryGetTeamMembers(2, out players2))
+                int countA;
+                int countB;
+                CountCharacters(out countA, out countB);
+                if (foundPlayer.GetPhotonTeam() == null)
                 {
-                    if (foundPlayer.GetPhotonTeam() == null)
-                    {
-                        if (players1.Length > players2.Length)
-                            foundPlayer.JoinOrSwitchTeam(2);
-                        else
-                            foundPlayer.JoinOrSwitchTeam(1);
-                    }
+                    if (countA > countB)
+                        foundPlayer.JoinOrSwitchTeam(2);
                     else
+                        foundPlayer.JoinOrSwitchTeam(1);
+                }
+                else
+                {
+                    switch (foundPlayer.GetPhotonTeam().Code)
                     {
-                        switch (foundPlayer.GetPhotonTeam().Code)
-                        {
-                            case 1:
-                                if (players1.Length < maxPlayerEachTeam)
-                                    foundPlayer.JoinOrSwitchTeam(2);
-                                break;
-                            case 2:
-                                if (players2.Length < maxPlayerEachTeam)
-                                    foundPlayer.JoinOrSwitchTeam(1);
-                                break;
-                        }
+                        case 1:
+                            if (countA < maxPlayerEachTeam)
+                                foundPlayer.JoinOrSwitchTeam(2);
+                            break;
+                        case 2:
+                            if (countB < maxPlayerEachTeam)
+                                foundPlayer.JoinOrSwitchTeam(1);
+                            break;
                     }
                 }
             }
+        }
+    }
+
+    protected void CountCharacters(out int countA, out int countB)
+    {
+        countA = 0;
+        countB = 0;
+        var characters = FindObjectsOfType<CharacterEntity>();
+        for (int i = 0; i < characters.Length; ++i)
+        {
+            if (characters[i] is MonsterEntity) continue;
+            if (characters[i].playerTeam == 1)
+                countA++;
+            if (characters[i].playerTeam == 2)
+                countB++;
         }
     }
 

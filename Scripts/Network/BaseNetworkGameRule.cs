@@ -58,7 +58,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     public abstract bool CanCharacterRespawn(BaseNetworkGameCharacter character, params object[] extraParams);
     public abstract bool RespawnCharacter(BaseNetworkGameCharacter character, params object[] extraParams);
 
-    protected readonly List<BaseNetworkGameCharacter> Bots = new List<BaseNetworkGameCharacter>();
+    protected BaseNetworkGameCharacter[] Bots { get { return FindObjectsOfType<BotEntity>(); } }
     protected readonly Dictionary<int, int> CharacterCollectedScore = new Dictionary<int, int>();
     protected readonly Dictionary<int, int> CharacterCollectedKill = new Dictionary<int, int>();
 
@@ -260,7 +260,6 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         if (!HasOptionBotCount)
             return;
         int addAmount = BotCount;
-        Bots.Clear();
         // Adjust bot count
         int maxPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
         if (networkManager.isConnectOffline)
@@ -276,7 +275,6 @@ public abstract class BaseNetworkGameRule : ScriptableObject
                 character.playerTeam = tempTeam = (byte)(tempTeam == 1 ? 2 : 1);
             }
             networkManager.RegisterCharacter(character);
-            Bots.Add(character);
         }
     }
 
@@ -291,16 +289,17 @@ public abstract class BaseNetworkGameRule : ScriptableObject
             maxPlayers = networkManager.maxConnections;
 
         // Remove bots if needed, will remove bots if player count + added bots > max players
-        while (Bots.Count > 0 && playerCount + Bots.Count > maxPlayers)
+        int count = Bots.Length;
+        while (count > 0 && playerCount + count > maxPlayers)
         {
-            int index = Bots.Count - 1;
+            int index = Bots.Length - 1;
             BaseNetworkGameCharacter botCharacter = Bots[index];
             PhotonNetwork.Destroy(botCharacter.photonView);
-            Bots.RemoveAt(index);
+            count--;
         }
 
         // Add bots if needed, will add bots if added bots < bot count && player count + added bots < max players
-        while (Bots.Count < BotCount && playerCount + Bots.Count < maxPlayers)
+        while (count < BotCount && playerCount + count < maxPlayers)
         {
             var character = NewBot();
             if (IsTeamGameplay)
@@ -309,7 +308,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
                 character.playerTeam = tempTeam = (byte)(tempTeam == 1 ? 2 : 1);
             }
             networkManager.RegisterCharacter(character);
-            Bots.Add(character);
+            count++;
         }
     }
 
