@@ -464,31 +464,63 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnRoomListUpdate(List<RoomInfo> rooms)
     {
-        Rooms.Clear();
-        foreach (var room in rooms)
-        {
-            var customProperties = room.CustomProperties;
-            if (customProperties.Count == 0)
-                continue;
-            var isMatchMaking = (bool)customProperties[CUSTOM_ROOM_MATCH_MAKE];
-            if (!isMatchMaking)
-            {
-                var discoveryData = new NetworkDiscoveryData();
-                discoveryData.name = room.Name;
-                discoveryData.roomName = (string)customProperties[CUSTOM_ROOM_ROOM_NAME];
-                discoveryData.roomPassword = (string)customProperties[CUSTOM_ROOM_ROOM_PASSWORD];
-                discoveryData.playerId = (string)customProperties[CUSTOM_ROOM_PLAYER_ID];
-                discoveryData.playerName = (string)customProperties[CUSTOM_ROOM_PLAYER_NAME];
-                discoveryData.sceneName = (string)customProperties[CUSTOM_ROOM_SCENE_NAME];
-                discoveryData.state = (byte)customProperties[CUSTOM_ROOM_STATE];
-                discoveryData.numPlayers = room.PlayerCount;
-                discoveryData.maxPlayers = room.MaxPlayers;
-                discoveryData.fullProperties = customProperties;
-                Rooms[discoveryData.name] = discoveryData;
-            }
-        }
+        CacheRoom(rooms);
         if (onReceivedRoomListUpdate != null)
             onReceivedRoomListUpdate.Invoke(new List<NetworkDiscoveryData>(Rooms.Values));
+    }
+
+    protected void CacheRoom(List<RoomInfo> rooms)
+    {
+        foreach (RoomInfo room in rooms)
+        {
+            // Remove room from cached room list if it got closed, became invisible or was marked as removed
+            if (!room.IsOpen || !room.IsVisible || room.RemovedFromList)
+            {
+                if (Rooms.ContainsKey(room.Name))
+                {
+                    Rooms.Remove(room.Name);
+                }
+
+                continue;
+            }
+
+            NetworkDiscoveryData discoveryData;
+            if (CanAddRoom(room, out discoveryData))
+            {
+                // Update cached room info
+                if (Rooms.ContainsKey(room.Name))
+                {
+                    Rooms[room.Name] = discoveryData;
+                }
+                // Add new room info to cache
+                else
+                {
+                    Rooms.Add(room.Name, discoveryData);
+                }
+            }
+        }
+    }
+
+    protected virtual bool CanAddRoom(RoomInfo room, out NetworkDiscoveryData discoveryData)
+    {
+        discoveryData = new NetworkDiscoveryData();
+        var customProperties = room.CustomProperties;
+        if (customProperties.Count == 0)
+            return false;
+        var isMatchMaking = (bool)customProperties[CUSTOM_ROOM_MATCH_MAKE];
+        if (isMatchMaking)
+            return false;
+        discoveryData.name = room.Name;
+        discoveryData.roomName = (string)customProperties[CUSTOM_ROOM_ROOM_NAME];
+        discoveryData.roomPassword = (string)customProperties[CUSTOM_ROOM_ROOM_PASSWORD];
+        discoveryData.playerId = (string)customProperties[CUSTOM_ROOM_PLAYER_ID];
+        discoveryData.playerName = (string)customProperties[CUSTOM_ROOM_PLAYER_NAME];
+        discoveryData.sceneName = (string)customProperties[CUSTOM_ROOM_SCENE_NAME];
+        discoveryData.state = (byte)customProperties[CUSTOM_ROOM_STATE];
+        discoveryData.numPlayers = room.PlayerCount;
+        discoveryData.maxPlayers = room.MaxPlayers;
+        discoveryData.fullProperties = customProperties;
+        return true;
     }
 
     protected void OnApplicationQuit()
@@ -527,6 +559,12 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         roomData.Clear();
         roomDataUpdateTime.Clear();
         roomDataHasUpdate.Clear();
+    }
+
+    public override void OnLeftLobby()
+    {
+        base.OnLeftLobby();
+        Rooms.Clear();
     }
 
     public override void OnLeftRoom()
