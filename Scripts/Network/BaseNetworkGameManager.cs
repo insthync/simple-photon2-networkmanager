@@ -109,7 +109,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
 
     public override void OnRoomListUpdate(List<RoomInfo> rooms)
     {
-        var foundRooms = new List<NetworkDiscoveryData>();
+        Rooms.Clear();
         foreach (var room in rooms)
         {
             var customProperties = room.CustomProperties;
@@ -134,11 +134,11 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                 discoveryData.matchKill = (int)customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_KILL];
                 discoveryData.matchScore = (int)customProperties[CUSTOM_ROOM_GAME_RULE_MATCH_SCORE];
                 discoveryData.fullProperties = customProperties;
-                foundRooms.Add(discoveryData);
+                Rooms[discoveryData.name] = discoveryData;
             }
         }
         if (onReceivedRoomListUpdate != null)
-            onReceivedRoomListUpdate.Invoke(foundRooms);
+            onReceivedRoomListUpdate.Invoke(new List<NetworkDiscoveryData>(Rooms.Values));
     }
 
     protected virtual void ServerUpdate()
