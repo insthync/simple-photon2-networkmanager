@@ -577,6 +577,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
                 break;
         }
         roomData.Clear();
+        botsTeams.Clear();
     }
 
     public override void OnLeftLobby()
