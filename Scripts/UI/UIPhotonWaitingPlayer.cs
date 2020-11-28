@@ -15,18 +15,16 @@ public class UIPhotonWaitingPlayer : MonoBehaviour
     public GameObject[] hostObjects;
     public GameObject[] owningObjects;
     public UIPhotonWaitingRoom Room { get; private set; }
-    public Player Data { get; private set; }
+    public Player Player { get; private set; }
 
-    public void SetData(UIPhotonWaitingRoom room, Player data)
+    public void SetData(UIPhotonWaitingRoom room, Player player)
     {
         Room = room;
-        Data = data;
-        PlayerState state = PlayerState.NotReady;
-        if (data.CustomProperties.ContainsKey(SimplePhotonNetworkManager.CUSTOM_PLAYER_STATE))
-            state = (PlayerState)(byte)data.CustomProperties[SimplePhotonNetworkManager.CUSTOM_PLAYER_STATE];
+        Player = player;
+        PlayerState state = (PlayerState)SimplePhotonNetworkManager.Singleton.GetRoomPlayerProperty(SimplePhotonNetworkManager.CUSTOM_PLAYER_STATE, player, (byte)PlayerState.NotReady);
 
         if (textPlayerName != null)
-            textPlayerName.text = data.NickName;
+            textPlayerName.text = player.NickName;
 
         if (textPlayerState != null)
         {
@@ -43,12 +41,12 @@ public class UIPhotonWaitingPlayer : MonoBehaviour
 
         foreach (var hostObject in hostObjects)
         {
-            hostObject.SetActive(room.HostPlayerID == data.UserId);
+            hostObject.SetActive(room.HostPlayerID == player.UserId);
         }
 
         foreach (var owningObject in owningObjects)
         {
-            owningObject.SetActive(PhotonNetwork.LocalPlayer.UserId == data.UserId);
+            owningObject.SetActive(PhotonNetwork.LocalPlayer.UserId == player.UserId);
         }
     }
 }

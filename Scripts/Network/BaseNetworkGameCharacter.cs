@@ -31,8 +31,8 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
     {
         get
         {
-            if (photonView != null && photonView.Owner != null && photonView.Owner.GetPhotonTeam() != null)
-                return photonView.Owner.GetPhotonTeam().Code;
+            if (photonView != null && photonView.Owner != null)
+                return SimplePhotonNetworkManager.Singleton.GetTeam(photonView.Owner);
             else
                 return 0;
         }
@@ -40,10 +40,7 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
         {
             if (photonView.IsMine)
             {
-                if (value == 0)
-                    photonView.Owner.LeaveCurrentTeam();
-                else
-                    photonView.Owner.JoinOrSwitchTeam(value);
+                SimplePhotonNetworkManager.Singleton.SetTeam(photonView.Owner, value);
             }
         }
     }

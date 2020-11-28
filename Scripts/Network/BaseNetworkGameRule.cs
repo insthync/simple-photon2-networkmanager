@@ -253,7 +253,6 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     }
 
     private float matchTimeReduceTimer;
-    private byte tempTeam;
 
     public virtual void AddBots()
     {
@@ -271,8 +270,10 @@ public abstract class BaseNetworkGameRule : ScriptableObject
             var character = NewBot();
             if (IsTeamGameplay)
             {
-                // TODO: Improve team codes
-                character.playerTeam = tempTeam = (byte)(tempTeam == 1 ? 2 : 1);
+                int countA;
+                int countB;
+                networkManager.CountCharacters(out countA, out countB);
+                character.playerTeam = (byte)(countA > countB ? 2 : 1);
             }
             networkManager.RegisterCharacter(character);
         }
@@ -304,8 +305,10 @@ public abstract class BaseNetworkGameRule : ScriptableObject
             var character = NewBot();
             if (IsTeamGameplay)
             {
-                // TODO: Improve team codes
-                character.playerTeam = tempTeam = (byte)(tempTeam == 1 ? 2 : 1);
+                int countA;
+                int countB;
+                networkManager.CountCharacters(out countA, out countB);
+                character.playerTeam = (byte)(countA > countB ? 2 : 1);
             }
             networkManager.RegisterCharacter(character);
             count++;

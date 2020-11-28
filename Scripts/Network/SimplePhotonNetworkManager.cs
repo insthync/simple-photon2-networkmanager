@@ -21,6 +21,13 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         Ready,
     }
 
+    public class RoomData
+    {
+        public bool HasUpdate { get; set; }
+        public float SetDataTime { get; set; }
+        public object Data { get; set; }
+    }    
+
     public const string OFFLINE_USER_ID = "OFFLINE_USER";
     public const int UNIQUE_VIEW_ID = 999;
     public const string CUSTOM_ROOM_ROOM_NAME = "R";
@@ -31,6 +38,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public const string CUSTOM_ROOM_MATCH_MAKE = "MM";
     public const string CUSTOM_ROOM_STATE = "St";
     public const string CUSTOM_PLAYER_STATE = "St";
+    public const string CUSTOM_PLAYER_TEAM = "T";
     public static SimplePhotonNetworkManager Singleton { get; protected set; }
     public static System.Action<List<NetworkDiscoveryData>> onReceivedRoomListUpdate;
     public static System.Action<DisconnectCause> onConnectionError;
@@ -82,9 +90,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     protected bool isQuitting;
     protected bool onlineSceneLoaded;
 
-    private static Dictionary<string, object> roomData = new Dictionary<string, object>();
-    private static Dictionary<string, float> roomDataUpdateTime = new Dictionary<string, float>();
-    private static Dictionary<string, bool> roomDataHasUpdate = new Dictionary<string, bool>();
+    private static Dictionary<string, RoomData> roomData = new Dictionary<string, RoomData>();
+    private static Dictionary<string, RoomData> roomPlayerData = new Dictionary<string, RoomData>();
     public static readonly Dictionary<string, NetworkDiscoveryData> Rooms = new Dictionary<string, NetworkDiscoveryData>();
     public static readonly Dictionary<string, Region> EnabledRegions = new Dictionary<string, Region>();
 
@@ -119,36 +126,52 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         {
             var time = Time.unscaledTime;
             var hashTable = new Hashtable();
-            var keys = new List<string>(roomDataUpdateTime.Keys);
-            foreach (var key in keys)
+            foreach (var key in roomData.Keys)
             {
-                if (roomDataHasUpdate[key] &&
-                    !hashTable.ContainsKey(key) &&
-                    (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(key) ||
-                    !roomData[key].Equals(PhotonNetwork.CurrentRoom.CustomProperties[key])) &&
-                    time - roomDataUpdateTime[key] >= updateRoomPropertyInterval)
+                if (time - roomData[key].SetDataTime >= updateRoomPropertyInterval && roomData[key].HasUpdate)
                 {
-                    hashTable.Add(key, roomData[key]);
+                    hashTable.Add(key, roomData[key].Data);
+                    roomData[key].HasUpdate = false;
                 }
             }
             PhotonNetwork.CurrentRoom.SetCustomProperties(hashTable);
         }
     }
 
-    public object GetRoomProperty(string key)
+    public T GetRoomProperty<T>(string key, T defaultValue = default)
     {
         if (PhotonNetwork.IsMasterClient && roomData.ContainsKey(key))
-            return roomData[key];
+            return (T)roomData[key].Data;
         else if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(key))
-            return PhotonNetwork.CurrentRoom.CustomProperties[key];
-        return null;
+            return (T)PhotonNetwork.CurrentRoom.CustomProperties[key];
+        return defaultValue;
     }
 
-    public void SetRoomProperty(string key, object value)
+    public void SetRoomProperty<T>(string key, T value)
     {
-        roomData[key] = value;
-        roomDataUpdateTime[key] = Time.unscaledTime;
-        roomDataHasUpdate[key] = true;
+        roomData[key] = new RoomData()
+        {
+            Data = value,
+            SetDataTime = Time.unscaledTime,
+            HasUpdate = true,
+        };
+    }
+
+    public T GetRoomPlayerProperty<T>(string key, Player player, T defaultValue = default)
+    {
+        if (player.CustomProperties.ContainsKey(key))
+            return (T)player.CustomProperties[key];
+        return defaultValue;
+    }
+
+    public void SetRoomPlayerProperty<T>(string key, Player player, T value)
+    {
+        var properties = player.CustomProperties;
+        if (properties.ContainsKey(key))
+            properties[key] = value;
+        else
+            properties.Add(key, value);
+        player.SetCustomProperties(properties);
     }
 
     protected virtual void OnDestroy()
@@ -382,21 +405,17 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         this.roomName = roomName;
         if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
         {
-            Hashtable customProperties = new Hashtable();
-            customProperties[CUSTOM_ROOM_ROOM_NAME] = roomName;
-            PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
+            SetRoomProperty(CUSTOM_ROOM_ROOM_NAME, roomName);
         }
     }
-    
+
     public void SetRoomPassword(string roomPassword)
     {
         // If room not created, set data to field to use later
         this.roomPassword = roomPassword;
         if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
         {
-            Hashtable customProperties = new Hashtable();
-            customProperties[CUSTOM_ROOM_ROOM_PASSWORD] = roomPassword;
-            PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
+            SetRoomProperty(CUSTOM_ROOM_ROOM_PASSWORD, roomPassword);
         }
     }
 
@@ -415,9 +434,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         this.onlineScene = onlineScene;
         if (PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
         {
-            Hashtable customProperties = new Hashtable();
-            customProperties[CUSTOM_ROOM_SCENE_NAME] = onlineScene.SceneName;
-            PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
+            SetRoomProperty(CUSTOM_ROOM_SCENE_NAME, onlineScene.SceneName);
         }
     }
 
@@ -557,8 +574,6 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
                 break;
         }
         roomData.Clear();
-        roomDataUpdateTime.Clear();
-        roomDataHasUpdate.Clear();
     }
 
     public override void OnLeftLobby()
@@ -627,7 +642,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         customProperties[CUSTOM_ROOM_PLAYER_NAME] = PhotonNetwork.LocalPlayer.NickName;
         customProperties[CUSTOM_ROOM_SCENE_NAME] = onlineScene.SceneName;
         customProperties[CUSTOM_ROOM_MATCH_MAKE] = false;
-        customProperties[CUSTOM_ROOM_STATE] = (byte) RoomState.Waiting;
+        customProperties[CUSTOM_ROOM_STATE] = (byte)RoomState.Waiting;
         PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
         if (startGameOnRoomCreated)
             StartGame();
@@ -672,9 +687,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             await Task.Yield();
         }
         // Change room state to playing
-        Hashtable customProperties = new Hashtable();
-        customProperties[CUSTOM_ROOM_STATE] = (byte)RoomState.Playing;
-        PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
+        SetRoomProperty(CUSTOM_ROOM_STATE, (byte)RoomState.Playing);
         // Setup start points for master client
         StartPoints = FindObjectsOfType<SimplePhotonStartPoint>();
     }
@@ -697,9 +710,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             }
         }
         // Set player state to not ready
-        Hashtable playerCustomProperties = new Hashtable();
-        playerCustomProperties[CUSTOM_PLAYER_STATE] = (byte)PlayerState.NotReady;
-        PhotonNetwork.LocalPlayer.SetCustomProperties(playerCustomProperties);
+        SetRoomPlayerProperty(CUSTOM_PLAYER_STATE, PhotonNetwork.LocalPlayer, (byte)PlayerState.NotReady);
 
         if (!isMatchMaking)
         {
@@ -751,10 +762,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
-        Hashtable customProperties = new Hashtable();
-        customProperties[CUSTOM_ROOM_PLAYER_ID] = newMasterClient.UserId;
-        customProperties[CUSTOM_ROOM_PLAYER_NAME] = newMasterClient.NickName;
-        PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
+        SetRoomProperty(CUSTOM_ROOM_PLAYER_ID, newMasterClient.UserId);
+        SetRoomProperty(CUSTOM_ROOM_PLAYER_NAME, newMasterClient.NickName);
         if (onMasterClientSwitched != null)
             onMasterClientSwitched.Invoke(newMasterClient);
     }
@@ -829,19 +838,15 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        Hashtable customProperties = new Hashtable();
-        PlayerState state = PlayerState.NotReady;
-        object stateObj;
-        if (customProperties.TryGetValue(CUSTOM_PLAYER_STATE, out stateObj))
-            state = (PlayerState)(byte)stateObj;
-        // Toggle state
+        PlayerState state;
+        state = (PlayerState)GetRoomPlayerProperty(CUSTOM_PLAYER_STATE, PhotonNetwork.LocalPlayer, (byte)PlayerState.NotReady);
+
         if (state == PlayerState.NotReady)
             state = PlayerState.Ready;
         else if (state == PlayerState.Ready)
             state = PlayerState.NotReady;
-        // Set state property
-        customProperties[CUSTOM_PLAYER_STATE] = (byte)state;
-        PhotonNetwork.LocalPlayer.SetCustomProperties(customProperties);
+
+        SetRoomPlayerProperty(CUSTOM_PLAYER_STATE, PhotonNetwork.LocalPlayer, (byte)state);
     }
 
     public void SetPlayerState(PlayerState playerState)
@@ -852,9 +857,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        Hashtable customProperties = new Hashtable();
-        customProperties[CUSTOM_PLAYER_STATE] = (byte)playerState;
-        PhotonNetwork.LocalPlayer.SetCustomProperties(customProperties);
+        SetRoomPlayerProperty(CUSTOM_PLAYER_STATE, PhotonNetwork.LocalPlayer, (byte)playerState);
     }
 
     public Player GetPlayerById(string id)
@@ -876,8 +879,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         int result = 0;
         foreach (var player in PhotonNetwork.PlayerList)
         {
-            object stateObject;
-            if (player.CustomProperties.TryGetValue(CUSTOM_PLAYER_STATE, out stateObject) && (PlayerState)stateObject == state)
+            PlayerState playerState = (PlayerState)GetRoomPlayerProperty(CUSTOM_PLAYER_STATE, player, (byte)PlayerState.NotReady);
+            if (playerState == state)
                 result++;
         }
         return result;
@@ -914,7 +917,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         return true;
     }
 
-    public static RoomState GetRoomState()
+    public RoomState GetRoomState()
     {
         if (PhotonNetwork.OfflineMode)
             return RoomState.Playing;
@@ -922,10 +925,21 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.InRoom)
             return RoomState.Waiting;
 
-        var customProperties = PhotonNetwork.CurrentRoom.CustomProperties;
-        if (customProperties.ContainsKey(CUSTOM_PLAYER_STATE))
-            return (RoomState)customProperties[CUSTOM_PLAYER_STATE];
+        return (RoomState)GetRoomProperty(CUSTOM_ROOM_STATE, (byte)RoomState.Waiting);
+    }
 
-        return RoomState.Waiting;
+    public byte GetTeam(Player player)
+    {
+        return GetRoomPlayerProperty(CUSTOM_PLAYER_TEAM, player, (byte)0);
+    }
+
+    public void SetTeam(Player player, byte team)
+    {
+        SetRoomPlayerProperty(CUSTOM_PLAYER_TEAM, player, team);
+    }
+
+    public void LeaveTeam(Player player)
+    {
+        SetTeam(player, 0);
     }
 }

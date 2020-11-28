@@ -13,8 +13,6 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         get { return SimplePhotonNetworkManager.Singleton as BaseNetworkGameManager; }
     }
 
-    public PhotonTeamsManager Teams { get; private set; }
-
     public const string CUSTOM_ROOM_GAME_RULE = "G";
     public const string CUSTOM_ROOM_GAME_RULE_BOT_COUNT = "Gbc";
     public const string CUSTOM_ROOM_GAME_RULE_MATCH_TIME = "Gmt";
@@ -29,15 +27,6 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     public float RemainsMatchTime { get; protected set; }
     public bool IsMatchEnded { get; protected set; }
     public float MatchEndedAt { get; protected set; }
-
-    private void Start()
-    {
-        // Setup required components
-        if (Teams == null)
-            Teams = GetComponent<PhotonTeamsManager>();
-        if (Teams == null)
-            Teams = gameObject.AddComponent<PhotonTeamsManager>();
-    }
 
     public int CountAliveCharacters()
     {
@@ -405,7 +394,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         bool isTeamGameplay = gameRule != null && gameRule.IsTeamGameplay;
         if (!isTeamGameplay)
         {
-            player.LeaveCurrentTeam();
+            LeaveTeam(player);
         }
         else
         {
@@ -413,9 +402,9 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
             int countB;
             CountCharacters(out countA, out countB);
             if (countA > countB)
-                player.JoinOrSwitchTeam(2);
+                SetTeam(player, 2);
             else
-                player.JoinOrSwitchTeam(1);
+                SetTeam(player, 1);
         }
     }
 
@@ -466,7 +455,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
             bool isTeamGameplay = gameRule != null && gameRule.IsTeamGameplay;
             if (!isTeamGameplay)
             {
-                foundPlayer.LeaveCurrentTeam();
+                LeaveTeam(foundPlayer);
             }
             else
             {
@@ -474,24 +463,24 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                 int countA;
                 int countB;
                 CountCharacters(out countA, out countB);
-                if (foundPlayer.GetPhotonTeam() == null)
+                if (GetTeam(foundPlayer) == 0)
                 {
                     if (countA > countB)
-                        foundPlayer.JoinOrSwitchTeam(2);
+                        SetTeam(foundPlayer, 2);
                     else
-                        foundPlayer.JoinOrSwitchTeam(1);
+                        SetTeam(foundPlayer, 1);
                 }
                 else
                 {
-                    switch (foundPlayer.GetPhotonTeam().Code)
+                    switch (GetTeam(foundPlayer))
                     {
                         case 1:
                             if (countA < maxPlayerEachTeam)
-                                foundPlayer.JoinOrSwitchTeam(2);
+                                SetTeam(foundPlayer, 2);
                             break;
                         case 2:
                             if (countB < maxPlayerEachTeam)
-                                foundPlayer.JoinOrSwitchTeam(1);
+                                SetTeam(foundPlayer, 1);
                             break;
                     }
                 }
@@ -499,14 +488,13 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         }
     }
 
-    protected void CountCharacters(out int countA, out int countB)
+    public void CountCharacters(out int countA, out int countB)
     {
         countA = 0;
         countB = 0;
         var characters = FindObjectsOfType<BaseNetworkGameCharacter>();
         for (int i = 0; i < characters.Length; ++i)
         {
-            if (characters[i].IsBot) continue;
             if (characters[i].playerTeam == 1)
                 countA++;
             if (characters[i].playerTeam == 2)

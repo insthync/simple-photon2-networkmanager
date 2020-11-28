@@ -250,23 +250,19 @@ public class UIPhotonWaitingRoom : UIBase
             key = SimplePhotonNetworkManager.OFFLINE_USER_ID;
         DestroyPlayerUI(key);
 
-        PhotonTeam team = player.GetPhotonTeam();
+        byte team = SimplePhotonNetworkManager.Singleton.GetTeam(player);
         Transform container = waitingPlayerListContainer;
         Dictionary<string, UIPhotonWaitingPlayer> uiDict = waitingPlayers;
-        // TODO: Improve team codes
-        if (team != null)
+        switch (team)
         {
-            switch (team.Code)
-            {
-                case 1:
-                    container = waitingPlayerTeamAListContainer;
-                    uiDict = waitingTeamAPlayers;
-                    break;
-                case 2:
-                    container = waitingPlayerTeamBListContainer;
-                    uiDict = waitingTeamBPlayers;
-                    break;
-            }
+            case 1:
+                container = waitingPlayerTeamAListContainer;
+                uiDict = waitingTeamAPlayers;
+                break;
+            case 2:
+                container = waitingPlayerTeamBListContainer;
+                uiDict = waitingTeamBPlayers;
+                break;
         }
         UIPhotonWaitingPlayer newEntry = Instantiate(waitingPlayerPrefab, container);
         newEntry.SetData(this, player);
@@ -278,13 +274,13 @@ public class UIPhotonWaitingRoom : UIBase
 
     private void UpdatePlayerUI(Player player)
     {
-        PhotonTeam team = player.GetPhotonTeam();
+        byte team = SimplePhotonNetworkManager.Singleton.GetTeam(player);
         string key = player.UserId;
         if (string.IsNullOrEmpty(key))
             key = SimplePhotonNetworkManager.OFFLINE_USER_ID;
         if (waitingPlayers.ContainsKey(key))
         {
-            if (team != null)
+            if (team != 0)
             {
                 // If player team changed, recreate waiting player UI
                 CreatePlayerUI(player);
@@ -294,7 +290,7 @@ public class UIPhotonWaitingRoom : UIBase
         }
         if (waitingTeamAPlayers.ContainsKey(key))
         {
-            if (team == null || team.Code != 1)
+            if (team == 0 || team != 1)
             {
                 // If player team changed, recreate waiting player UI
                 CreatePlayerUI(player);
@@ -304,7 +300,7 @@ public class UIPhotonWaitingRoom : UIBase
         }
         if (waitingTeamBPlayers.ContainsKey(key))
         {
-            if (team == null || team.Code != 2)
+            if (team == 0 || team != 2)
             {
                 // If player team changed, recreate waiting player UI
                 CreatePlayerUI(player);
