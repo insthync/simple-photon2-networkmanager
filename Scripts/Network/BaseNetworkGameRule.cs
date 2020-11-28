@@ -315,7 +315,12 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
     }
 
-    public virtual void OnStartServer(BaseNetworkGameManager manager)
+    public virtual void OnStartClient(BaseNetworkGameManager manager)
+    {
+        networkManager = manager;
+    }
+
+    public virtual void OnStartMaster(BaseNetworkGameManager manager)
     {
         networkManager = manager;
         BotCount = botCount;

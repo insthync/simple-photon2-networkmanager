@@ -22,7 +22,8 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     public BaseNetworkGameRule gameRule;
     protected float updateScoreTime;
     protected float updateMatchTime;
-    protected bool startUpdateGameRule;
+    protected bool masterStarted;
+    protected bool clientStarted;
     public readonly List<BaseNetworkGameCharacter> Characters = new List<BaseNetworkGameCharacter>();
     public float RemainsMatchTime { get; protected set; }
     public bool IsMatchEnded { get; protected set; }
@@ -129,21 +130,13 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         if (GetRoomState() == RoomState.Waiting)
             return;
 
-        if (gameRule != null && startUpdateGameRule)
+        if (gameRule != null && masterStarted)
             gameRule.OnUpdate();
 
         if (Time.unscaledTime - updateScoreTime >= 1f)
         {
-            if (gameRule != null && !gameRule.IsMatchEnded)
-            {
-                int length = 0;
-                List<object> objects;
-                GetSortedScoresAsObjects(out length, out objects);
-                if (isConnectOffline)
-                    RpcUpdateScores(length, objects.ToArray());
-                else
-                    photonView.AllRPC(RpcUpdateScores, length, objects.ToArray());
-            }
+            if (gameRule == null || !gameRule.IsMatchEnded)
+                UpdateMatchScores();
             updateScoreTime = Time.unscaledTime;
         }
 
@@ -157,6 +150,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
 
             if (!IsMatchEnded && gameRule.IsMatchEnded)
             {
+                UpdateMatchScores();
                 IsMatchEnded = true;
                 MatchEndedAt = Time.unscaledTime;
             }
@@ -168,6 +162,17 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     protected virtual void ClientUpdate()
     {
 
+    }
+
+    protected void UpdateMatchScores()
+    {
+        int length;
+        List<object> objects;
+        GetSortedScoresAsObjects(out length, out objects);
+        if (isConnectOffline)
+            RpcUpdateScores(length, objects.ToArray());
+        else
+            photonView.AllRPC(RpcUpdateScores, length, objects.ToArray());
     }
 
     public void SendKillNotify(string killerName, string victimName, string weaponId)
@@ -324,10 +329,15 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         {
             gameRule = foundGameRule;
             gameRule.InitialClientObjects();
-            if (PhotonNetwork.IsMasterClient && !startUpdateGameRule)
+            if (PhotonNetwork.IsMasterClient && !masterStarted)
             {
-                startUpdateGameRule = true;
-                gameRule.OnStartServer(this);
+                masterStarted = true;
+                gameRule.OnStartMaster(this);
+            }
+            if (!PhotonNetwork.IsMasterClient && !clientStarted)
+            {
+                clientStarted = true;
+                gameRule.OnStartClient(this);
             }
         }
     }
@@ -335,6 +345,11 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
         base.OnMasterClientSwitched(newMasterClient);
+        if (newMasterClient.ActorNumber != PhotonNetwork.LocalPlayer.ActorNumber)
+        {
+            masterStarted = false;
+            return;
+        }
         if (GetRoomState() == RoomState.Playing)
         {
             Characters.Clear();
@@ -346,7 +361,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
             if (gameRule != null)
                 gameRule.OnMasterChange(this);
         }
-        startUpdateGameRule = true;
+        masterStarted = true;
     }
 
     public override void OnJoinedRoom()
@@ -502,7 +517,8 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         RemainsMatchTime = 0f;
         IsMatchEnded = false;
         MatchEndedAt = 0f;
-        startUpdateGameRule = false;
+        masterStarted = false;
+        clientStarted = false;
     }
 
     protected abstract void UpdateScores(NetworkGameScore[] scores);
