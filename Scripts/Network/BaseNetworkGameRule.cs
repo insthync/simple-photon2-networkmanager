@@ -58,7 +58,6 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     public abstract bool CanCharacterRespawn(BaseNetworkGameCharacter character, params object[] extraParams);
     public abstract bool RespawnCharacter(BaseNetworkGameCharacter character, params object[] extraParams);
 
-    protected BaseNetworkGameCharacter[] Bots { get { return FindObjectsOfType<BaseNetworkGameCharacter>(); } }
     protected readonly Dictionary<int, int> CharacterCollectedScore = new Dictionary<int, int>();
     protected readonly Dictionary<int, int> CharacterCollectedKill = new Dictionary<int, int>();
 
@@ -279,6 +278,17 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         }
     }
 
+    protected virtual List<BaseNetworkGameCharacter> GetBots()
+    {
+        List<BaseNetworkGameCharacter> result = new List<BaseNetworkGameCharacter>(FindObjectsOfType<BaseNetworkGameCharacter>());
+        for (int i = result.Count - 1; i >= 0; --i)
+        {
+            if (result[i].IsBot)
+                result.RemoveAt(i);
+        }
+        return result;
+    }
+
     public virtual void AdjustBots()
     {
         if (!HasOptionBotCount)
@@ -290,11 +300,12 @@ public abstract class BaseNetworkGameRule : ScriptableObject
             maxPlayers = networkManager.maxConnections;
 
         // Remove bots if needed, will remove bots if player count + added bots > max players
-        int count = Bots.Length;
+        List<BaseNetworkGameCharacter> bots = GetBots();
+        int count = bots.Count;
         while (count > 0 && playerCount + count > maxPlayers)
         {
-            int index = Bots.Length - 1;
-            BaseNetworkGameCharacter botCharacter = Bots[index];
+            int index = bots.Count - 1;
+            BaseNetworkGameCharacter botCharacter = bots[index];
             PhotonNetwork.Destroy(botCharacter.photonView);
             count--;
         }
