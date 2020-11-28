@@ -272,7 +272,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
             {
                 int countA;
                 int countB;
-                networkManager.CountCharacters(out countA, out countB);
+                networkManager.CountTeamPlayers(out countA, out countB);
                 character.playerTeam = (byte)(countA > countB ? 2 : 1);
             }
             networkManager.RegisterCharacter(character);
@@ -307,7 +307,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
             {
                 int countA;
                 int countB;
-                networkManager.CountCharacters(out countA, out countB);
+                networkManager.CountTeamPlayers(out countA, out countB);
                 character.playerTeam = (byte)(countA > countB ? 2 : 1);
             }
             networkManager.RegisterCharacter(character);

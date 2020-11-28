@@ -88,6 +88,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
             CUSTOM_ROOM_SCENE_NAME,
             CUSTOM_ROOM_MATCH_MAKE,
             CUSTOM_ROOM_STATE,
+            CUSTOM_ROOM_BOTS_TEAMS,
             CUSTOM_ROOM_GAME_RULE,
             CUSTOM_ROOM_GAME_RULE_BOT_COUNT,
             CUSTOM_ROOM_GAME_RULE_MATCH_TIME,
@@ -400,7 +401,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         {
             int countA;
             int countB;
-            CountCharacters(out countA, out countB);
+            CountTeamPlayers(out countA, out countB);
             if (countA > countB)
                 SetTeam(player, 2);
             else
@@ -462,7 +463,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                 var maxPlayerEachTeam = PhotonNetwork.CurrentRoom.MaxPlayers / 2;
                 int countA;
                 int countB;
-                CountCharacters(out countA, out countB);
+                CountTeamPlayers(out countA, out countB);
                 if (GetTeam(foundPlayer) == 0)
                 {
                     if (countA > countB)
@@ -485,20 +486,6 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                     }
                 }
             }
-        }
-    }
-
-    public void CountCharacters(out int countA, out int countB)
-    {
-        countA = 0;
-        countB = 0;
-        var characters = FindObjectsOfType<BaseNetworkGameCharacter>();
-        for (int i = 0; i < characters.Length; ++i)
-        {
-            if (characters[i].playerTeam == 1)
-                countA++;
-            if (characters[i].playerTeam == 2)
-                countB++;
         }
     }
 

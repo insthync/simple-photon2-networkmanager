@@ -31,6 +31,8 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
     {
         get
         {
+            if (IsBot)
+                return SimplePhotonNetworkManager.Singleton.GetBotTeam(photonView.ViewID);
             if (photonView != null && photonView.Owner != null)
                 return SimplePhotonNetworkManager.Singleton.GetTeam(photonView.Owner);
             else
@@ -38,10 +40,10 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
         }
         set
         {
-            if (photonView.IsMine)
-            {
+            if (IsBot)
+                SimplePhotonNetworkManager.Singleton.SetBotTeam(photonView.ViewID, value);
+            if (!IsBot && photonView.IsMine)
                 SimplePhotonNetworkManager.Singleton.SetTeam(photonView.Owner, value);
-            }
         }
     }
     public int score

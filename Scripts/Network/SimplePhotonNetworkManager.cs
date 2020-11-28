@@ -37,6 +37,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public const string CUSTOM_ROOM_SCENE_NAME = "S";
     public const string CUSTOM_ROOM_MATCH_MAKE = "MM";
     public const string CUSTOM_ROOM_STATE = "St";
+    public const string CUSTOM_ROOM_BOTS_TEAMS = "BT";
     public const string CUSTOM_PLAYER_STATE = "St";
     public const string CUSTOM_PLAYER_TEAM = "T";
     public static SimplePhotonNetworkManager Singleton { get; protected set; }
@@ -82,16 +83,17 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public bool isConnectOffline { get; protected set; }
     public bool isMatchMaking { get; protected set; }
     public float startMatchMakingTime { get; protected set; }
+
     private bool startGameOnRoomCreated;
-    private Hashtable cacheMatchMakingFilters;
+    private Hashtable tempMatchMakingFilters;
     protected bool isConnectingToBestRegion;
     protected bool isConnectedToBestRegion;
     protected bool isConnectingToSelectedRegion;
     protected bool isQuitting;
     protected bool onlineSceneLoaded;
 
-    private static Dictionary<string, RoomData> roomData = new Dictionary<string, RoomData>();
-    private static Dictionary<string, RoomData> roomPlayerData = new Dictionary<string, RoomData>();
+    private Dictionary<string, RoomData> roomData = new Dictionary<string, RoomData>();
+    private Dictionary<int, byte> botsTeams = new Dictionary<int, byte>();
     public static readonly Dictionary<string, NetworkDiscoveryData> Rooms = new Dictionary<string, NetworkDiscoveryData>();
     public static readonly Dictionary<string, Region> EnabledRegions = new Dictionary<string, Region>();
 
@@ -341,7 +343,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             CUSTOM_ROOM_PLAYER_NAME,
             CUSTOM_ROOM_SCENE_NAME,
             CUSTOM_ROOM_MATCH_MAKE,
-            CUSTOM_ROOM_STATE
+            CUSTOM_ROOM_STATE,
+            CUSTOM_ROOM_BOTS_TEAMS
         };
     }
 
@@ -369,7 +372,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             filters = new Hashtable();
         filters[CUSTOM_ROOM_MATCH_MAKE] = true;
         PhotonNetwork.JoinRandomRoom(filters, 0);
-        cacheMatchMakingFilters = filters;
+        tempMatchMakingFilters = filters;
         startMatchMakingTime = Time.unscaledTime;
         if (onMatchMakingStarted != null)
             onMatchMakingStarted.Invoke();
@@ -705,7 +708,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             if (isMatchMaking)
             {
                 // Set match making state to true for join random filter later
-                PhotonNetwork.CurrentRoom.SetCustomProperties(cacheMatchMakingFilters);
+                PhotonNetwork.CurrentRoom.SetCustomProperties(tempMatchMakingFilters);
 
             }
         }
@@ -796,6 +799,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         if (isLog) Debug.Log("OnPhotonCustomRoomPropertiesChanged " + propertiesThatChanged.ToStringFull());
         if (onCustomRoomPropertiesChanged != null)
             onCustomRoomPropertiesChanged.Invoke(propertiesThatChanged);
+        botsTeams = GetBotsTeams();
     }
 
     public override void OnRegionListReceived(RegionHandler regionHandler)
@@ -941,5 +945,70 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
     public void LeaveTeam(Player player)
     {
         SetTeam(player, 0);
+    }
+
+    protected Dictionary<int, byte> GetBotsTeams()
+    {
+        Dictionary<int, byte> result = new Dictionary<int, byte>();
+        string savedValue = GetRoomProperty(CUSTOM_ROOM_BOTS_TEAMS, string.Empty);
+        string[] splitedEntry = savedValue.Split(';');
+        foreach (var entry in splitedEntry)
+        {
+            string[] splitedKV = entry.Split(':');
+            if (splitedKV == null || splitedKV.Length != 2) continue;
+            result[int.Parse(splitedKV[0])] = byte.Parse(splitedKV[1]);
+        }
+        return result;
+    }
+
+    protected void SetBotsTeams(Dictionary<int, byte> botsTeam)
+    {
+        string savingValue = string.Empty;
+        foreach (var entry in botsTeam)
+        {
+            savingValue += $"{entry.Key}:{entry.Value};";
+        }
+        SetRoomProperty(CUSTOM_ROOM_BOTS_TEAMS, savingValue);
+    }
+
+    public byte GetBotTeam(int viewId)
+    {
+        if (botsTeams.ContainsKey(viewId))
+            return botsTeams[viewId];
+        return 0;
+    }
+
+    public void SetBotTeam(int viewId, byte team)
+    {
+        botsTeams[viewId] = team;
+        SetBotsTeams(botsTeams);
+    }
+
+    public void CountTeamPlayers(out int countA, out int countB)
+    {
+        countA = 0;
+        countB = 0;
+        foreach (var player in PhotonNetwork.PlayerList)
+        {
+            var team = GetTeam(player);
+            if (team == 1)
+                countA++;
+            if (team == 2)
+                countB++;
+        }
+        HashSet<int> viewIds = new HashSet<int>();
+        foreach (var view in PhotonNetwork.PhotonViews)
+        {
+            viewIds.Add(view.ViewID);
+        }
+        foreach (var entry in botsTeams)
+        {
+            if (!viewIds.Contains(entry.Key))
+                continue;
+            if (entry.Value == 1)
+                countA++;
+            if (entry.Value == 2)
+                countB++;
+        }
     }
 }
