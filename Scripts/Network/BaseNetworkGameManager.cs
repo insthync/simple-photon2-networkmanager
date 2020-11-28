@@ -206,7 +206,6 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
 
     public void GetSortedScoresAsObjects(out int length, out List<object> objects)
     {
-        length = 0;
         objects = new List<object>();
         var sortedScores = GetSortedScores();
         length = (sortedScores.Length);
