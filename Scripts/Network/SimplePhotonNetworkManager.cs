@@ -556,6 +556,9 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         if (!SceneManager.GetActiveScene().name.Equals(offlineScene.SceneName))
             SceneManager.LoadScene(offlineScene.SceneName);
         OnStopMatchMaking();
+        roomData.Clear();
+        botsTeams.Clear();
+        Rooms.Clear();
         if (isConnectOffline)
         {
             // Connect offline, so it won't cause connection error
@@ -576,13 +579,14 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
                     onConnectionError.Invoke(cause);
                 break;
         }
-        roomData.Clear();
-        botsTeams.Clear();
     }
 
     public override void OnLeftLobby()
     {
-        base.OnLeftLobby();
+        if (isQuitting)
+            return;
+        roomData.Clear();
+        botsTeams.Clear();
         Rooms.Clear();
     }
 
@@ -597,6 +601,9 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         if (onLeftRoom != null)
             onLeftRoom.Invoke();
         OnStopMatchMaking();
+        roomData.Clear();
+        botsTeams.Clear();
+        Rooms.Clear();
     }
 
     public override void OnCreateRoomFailed(short code, string msg)
