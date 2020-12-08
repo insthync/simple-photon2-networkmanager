@@ -1,6 +1,4 @@
-﻿using Photon.Pun.UtilityScripts;
-
-[System.Serializable]
+﻿[System.Serializable]
 public struct NetworkGameScore
 {
     public static readonly NetworkGameScore Empty = new NetworkGameScore();
