@@ -427,7 +427,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
 
     public virtual void OnUpdateCharacter(BaseNetworkGameCharacter character)
     {
-        if (IsMatchEnded)
+        if (IsMatchEnded || character.IsBot)
             return;
 
         int checkScore = character.Score;
