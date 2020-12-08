@@ -39,7 +39,6 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     public string Title { get { return title; } }
     public string Description { get { return description; } }
     protected abstract BaseNetworkGameCharacter NewBot();
-    protected abstract void EndMatch();
     public int DefaultBotCount { get { return defaultBotCount; } }
     public int DefaultMatchTime { get { return defaultMatchTime; } }
     public int DefaultMatchKill { get { return defaultMatchKill; } }
@@ -427,7 +426,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
 
     public virtual void OnUpdateCharacter(BaseNetworkGameCharacter character)
     {
-        if (IsMatchEnded || character.IsBot)
+        if (IsMatchEnded)
             return;
 
         int checkScore = character.Score;
@@ -459,6 +458,13 @@ public abstract class BaseNetworkGameRule : ScriptableObject
             IsMatchEnded = true;
             EndMatch();
         }
+    }
+
+
+    public virtual void EndMatch()
+    {
+        PhotonNetwork.CurrentRoom.IsOpen = false;
+        PhotonNetwork.CurrentRoom.IsVisible = false;
     }
 
     public virtual void InitData()
