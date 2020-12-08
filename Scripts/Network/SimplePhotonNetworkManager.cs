@@ -149,7 +149,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
         return defaultValue;
     }
 
-    public void SetRoomProperty<T>(string key, T value)
+    public void SetRoomProperty<T>(string key, T value, bool updateImmediately = false)
     {
         roomData[key] = new RoomData()
         {
@@ -157,6 +157,14 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
             SetDataTime = Time.unscaledTime,
             HasUpdate = true,
         };
+        if (updateImmediately && PhotonNetwork.InRoom && PhotonNetwork.IsMasterClient)
+        {
+            roomData[key].HasUpdate = false;
+            PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable()
+            {
+                { key, value }
+            });
+        }
     }
 
     public T GetRoomPlayerProperty<T>(string key, Player player, T defaultValue = default)

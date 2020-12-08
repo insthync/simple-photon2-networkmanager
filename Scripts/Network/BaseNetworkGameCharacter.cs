@@ -1,14 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Photon;
 using Photon.Pun;
-using Photon.Pun.UtilityScripts;
 using Photon.Realtime;
 
 public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, System.IComparable<BaseNetworkGameCharacter>
 {
     public static BaseNetworkGameCharacter Local { get; private set; }
+    public static int LocalViewId { get; set; }
+    public static int LocalRank { get; set; }
 
     public GameObject[] noTeamObjects;
     public GameObject[] teamAObjects;
@@ -225,6 +225,8 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
             return;
 
         Local = this;
+        LocalViewId = photonView.ViewID;
+        LocalRank = 0;
     }
 
     protected virtual void Update()

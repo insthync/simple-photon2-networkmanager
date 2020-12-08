@@ -21,12 +21,12 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     public BaseNetworkGameRule gameRule;
     protected float updateScoreTime;
     protected float updateMatchTime;
-    protected bool masterStarted;
-    protected bool clientStarted;
     public readonly List<BaseNetworkGameCharacter> Characters = new List<BaseNetworkGameCharacter>();
     public float RemainsMatchTime { get; protected set; }
     public bool IsMatchEnded { get; protected set; }
     public float MatchEndedAt { get; protected set; }
+    public bool MasterStarted { get; protected set; }
+    public bool ClientStarted { get; protected set; }
 
     public int CountAliveCharacters()
     {
@@ -52,20 +52,6 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                 ++count;
         }
         return count;
-    }
-
-    public override void LeaveRoom()
-    {
-        if (gameRule != null)
-            gameRule.OnStopConnection(this);
-        base.LeaveRoom();
-    }
-
-    public override void Disconnect()
-    {
-        if (gameRule != null)
-            gameRule.OnStopConnection(this);
-        base.Disconnect();
     }
 
     protected override void Update()
@@ -129,7 +115,10 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         if (GetRoomState() == RoomState.Waiting)
             return;
 
-        if (gameRule != null && masterStarted)
+        if (!MasterStarted)
+            return;
+
+        if (gameRule != null)
             gameRule.OnUpdate();
 
         if (Time.unscaledTime - updateScoreTime >= 1f)
@@ -147,7 +136,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                 if (isConnectOffline)
                     RpcMatchStatus(gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
                 else
-                    photonView.AllRPC(RpcMatchStatus, gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
+                    photonView.OthersRPC(RpcMatchStatus, gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
                 updateMatchTime = Time.unscaledTime;
             }
 
@@ -197,15 +186,17 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         for (var i = 0; i < Characters.Count; ++i)
         {
             var character = Characters[i];
-            var ranking = new NetworkGameScore();
-            ranking.viewId = character.photonView.ViewID;
-            ranking.playerName = character.playerName;
-            ranking.team = character.playerTeam;
-            ranking.score = character.Score;
-            ranking.killCount = character.KillCount;
-            ranking.assistCount = character.AssistCount;
-            ranking.dieCount = character.DieCount;
-            scores[i] = ranking;
+            var score = new NetworkGameScore();
+            score.viewId = character.photonView.ViewID;
+            score.playerName = character.playerName;
+            score.team = character.playerTeam;
+            score.score = character.Score;
+            score.killCount = character.KillCount;
+            score.assistCount = character.AssistCount;
+            score.dieCount = character.DieCount;
+            if (score.viewId == BaseNetworkGameCharacter.LocalViewId)
+                BaseNetworkGameCharacter.LocalRank = i + 1;
+            scores[i] = score;
         }
         return scores;
     }
@@ -214,7 +205,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     {
         objects = new List<object>();
         var sortedScores = GetSortedScores();
-        length = (sortedScores.Length);
+        length = sortedScores.Length;
         foreach (var sortedScore in sortedScores)
         {
             objects.Add(sortedScore.viewId);
@@ -290,7 +281,6 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
 
     public override void OnCreatedRoom()
     {
-        // Reset last game/match data
         ResetGame();
         Hashtable customProperties = new Hashtable();
         customProperties[CUSTOM_ROOM_GAME_RULE] = gameRule == null ? "" : gameRule.name;
@@ -302,10 +292,25 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         base.OnCreatedRoom();
     }
 
+    public override void OnLeftRoom()
+    {
+        if (gameRule != null)
+            gameRule.OnStopConnection(this);
+        ResetGame();
+        base.OnLeftRoom();
+    }
+
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        if (gameRule != null)
+            gameRule.OnStopConnection(this);
+        ResetGame();
+        base.OnDisconnected(cause);
+    }
+
     public override void OnOnlineSceneChanged()
     {
         if (isLog) Debug.Log("OnOnlineSceneChanged");
-        // Reset last game/match data
         ResetGame();
         onlineSceneLoaded = true;
         if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(CUSTOM_ROOM_GAME_RULE))
@@ -330,14 +335,14 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         {
             gameRule = foundGameRule;
             gameRule.InitialClientObjects();
-            if (PhotonNetwork.IsMasterClient && !masterStarted)
+            if (PhotonNetwork.IsMasterClient && !MasterStarted)
             {
-                masterStarted = true;
+                MasterStarted = true;
                 gameRule.OnStartMaster(this);
             }
-            if (!PhotonNetwork.IsMasterClient && !clientStarted)
+            if (!PhotonNetwork.IsMasterClient && !ClientStarted)
             {
-                clientStarted = true;
+                ClientStarted = true;
                 gameRule.OnStartClient(this);
             }
         }
@@ -348,7 +353,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         base.OnMasterClientSwitched(newMasterClient);
         if (newMasterClient.ActorNumber != PhotonNetwork.LocalPlayer.ActorNumber)
         {
-            masterStarted = false;
+            MasterStarted = false;
             return;
         }
         if (GetRoomState() == RoomState.Playing)
@@ -362,7 +367,7 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
             if (gameRule != null)
                 gameRule.OnMasterChange(this);
         }
-        masterStarted = true;
+        MasterStarted = true;
     }
 
     public override void OnJoinedRoom()
@@ -378,10 +383,6 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         {
             if (GetRoomState() == RoomState.Playing && gameRule != null && !gameRule.IsMatchEnded)
             {
-                int length = 0;
-                List<object> objects;
-                GetSortedScoresAsObjects(out length, out objects);
-                photonView.TargetRPC(RpcUpdateScores, newPlayer, length, objects.ToArray());
                 if (gameRule != null)
                     photonView.TargetRPC(RpcMatchStatus, newPlayer, gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
                 // Adjust bots
@@ -446,6 +447,8 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
             score.killCount = (int)objects[j++];
             score.assistCount = (int)objects[j++];
             score.dieCount = (int)objects[j++];
+            if (score.viewId == BaseNetworkGameCharacter.LocalViewId)
+                BaseNetworkGameCharacter.LocalRank = i + 1;
             scores[i] = score;
         }
         UpdateScores(scores);
@@ -518,8 +521,8 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
         RemainsMatchTime = 0f;
         IsMatchEnded = false;
         MatchEndedAt = 0f;
-        masterStarted = false;
-        clientStarted = false;
+        MasterStarted = false;
+        ClientStarted = false;
     }
 
     protected abstract void UpdateScores(NetworkGameScore[] scores);

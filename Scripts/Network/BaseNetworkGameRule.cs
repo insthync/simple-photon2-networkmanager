@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-using Photon.Pun.UtilityScripts;
-using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public abstract class BaseNetworkGameRule : ScriptableObject
 {
@@ -76,14 +74,14 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (float)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeCountdownKey]; } catch { }
+            try { return networkManager.GetRoomProperty(MatchTimeCountdownKey, _matchTimeCountdown); } catch { }
             return _matchTimeCountdown;
         }
         protected set
         {
             if (PhotonNetwork.IsMasterClient && value != MatchTimeCountdown)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeCountdownKey, value } });
+                networkManager.SetRoomProperty(MatchTimeCountdownKey, value, true);
                 _matchTimeCountdown = value;
             }
         }
@@ -94,14 +92,14 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (bool)PhotonNetwork.CurrentRoom.CustomProperties[IsMatchEndedKey]; } catch { }
+            try { return networkManager.GetRoomProperty(IsMatchEndedKey, _isMatchEnded); } catch { }
             return _isMatchEnded;
         }
         protected set
         {
             if (PhotonNetwork.IsMasterClient && value != IsMatchEnded)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { IsMatchEndedKey, value } });
+                networkManager.SetRoomProperty(IsMatchEndedKey, value, true);
                 _isMatchEnded = value;
             }
         }
@@ -112,14 +110,14 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[BotCountKey]; } catch { }
+            try { return networkManager.GetRoomProperty(BotCountKey, _botCount); } catch { }
             return _botCount;
         }
         protected set
         {
             if (PhotonNetwork.IsMasterClient && value != BotCount)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { BotCountKey, value } });
+                networkManager.SetRoomProperty(BotCountKey, value, true);
                 _botCount = value;
             }
         }
@@ -130,14 +128,14 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchTimeKey]; } catch { }
+            try { return networkManager.GetRoomProperty(MatchTimeKey, _matchTime); } catch { }
             return _matchTime;
         }
         protected set
         {
             if (PhotonNetwork.IsMasterClient && value != MatchTime)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchTimeKey, value } });
+                networkManager.SetRoomProperty(MatchTimeKey, value, true);
                 _matchTime = value;
             }
         }
@@ -148,14 +146,14 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchKillKey]; } catch { }
+            try { return networkManager.GetRoomProperty(MatchKillKey, _matchKill); } catch { }
             return _matchKill;
         }
         protected set
         {
             if (PhotonNetwork.IsMasterClient && value != MatchKill)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchKillKey, value } });
+                networkManager.SetRoomProperty(MatchKillKey, value, true);
                 _matchKill = value;
             }
         }
@@ -166,14 +164,14 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[MatchScoreKey]; } catch { }
+            try { return networkManager.GetRoomProperty(MatchScoreKey, _matchScore); } catch { }
             return _matchScore;
         }
         protected set
         {
             if (PhotonNetwork.IsMasterClient && value != MatchScore)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { MatchScoreKey, value } });
+                networkManager.SetRoomProperty(MatchScoreKey, value, true);
                 _matchScore = value;
             }
         }
@@ -184,14 +182,14 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamScoreAKey]; } catch { }
+            try { return networkManager.GetRoomProperty(TeamScoreAKey, _teamScoreA); } catch { }
             return _teamScoreA;
         }
         protected set
         {
             if (PhotonNetwork.IsMasterClient && value != TeamScoreA)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreAKey, value } });
+                networkManager.SetRoomProperty(TeamScoreAKey, value, true);
                 _teamScoreA = value;
             }
         }
@@ -202,14 +200,14 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamScoreBKey]; } catch { }
+            try { return networkManager.GetRoomProperty(TeamScoreBKey, _teamScoreB); } catch { }
             return _teamScoreB;
         }
         protected set
         {
             if (PhotonNetwork.IsMasterClient && value != TeamScoreB)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamScoreBKey, value } });
+                networkManager.SetRoomProperty(TeamScoreBKey, value, true);
                 _teamScoreB = value;
             }
         }
@@ -220,14 +218,14 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamKillAKey]; } catch { }
+            try { return networkManager.GetRoomProperty(TeamKillAKey, _teamKillA); } catch { }
             return _teamKillA;
         }
         protected set
         {
             if (PhotonNetwork.IsMasterClient && value != TeamKillA)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamKillAKey, value } });
+                networkManager.SetRoomProperty(TeamKillAKey, value, true);
                 _teamKillA = value;
             }
         }
@@ -238,14 +236,14 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     {
         get
         {
-            try { return (int)PhotonNetwork.CurrentRoom.CustomProperties[TeamKillBKey]; } catch { }
+            try { return networkManager.GetRoomProperty(TeamKillBKey, _teamKillB); } catch { }
             return _teamKillB;
         }
         protected set
         {
             if (PhotonNetwork.IsMasterClient && value != TeamKillB)
             {
-                PhotonNetwork.CurrentRoom.SetCustomProperties(new Hashtable() { { TeamKillBKey, value } });
+                networkManager.SetRoomProperty(TeamKillBKey, value, true);
                 _teamKillB = value;
             }
         }
@@ -349,7 +347,16 @@ public abstract class BaseNetworkGameRule : ScriptableObject
 
     public virtual void OnStopConnection(BaseNetworkGameManager manager)
     {
-
+        BotCount = botCount;
+        MatchTime = matchTime;
+        MatchKill = matchKill;
+        MatchScore = matchScore;
+        TeamScoreA = 0;
+        TeamScoreB = 0;
+        TeamKillA = 0;
+        TeamKillB = 0;
+        MatchTimeCountdown = MatchTime;
+        IsMatchEnded = false;
     }
 
     public virtual void OnMasterChange(BaseNetworkGameManager manager)
@@ -420,6 +427,9 @@ public abstract class BaseNetworkGameRule : ScriptableObject
 
     public virtual void OnUpdateCharacter(BaseNetworkGameCharacter character)
     {
+        if (IsMatchEnded)
+            return;
+
         int checkScore = character.Score;
         int checkKill = character.KillCount;
         if (IsTeamGameplay)
