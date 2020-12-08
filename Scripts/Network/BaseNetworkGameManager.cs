@@ -245,19 +245,19 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
 
     public virtual void OnScoreIncrease(BaseNetworkGameCharacter character, int increaseAmount)
     {
-        if (gameRule != null)
+        if (gameRule != null && Characters.Contains(character))
             gameRule.OnScoreIncrease(character, increaseAmount);
     }
 
     public virtual void OnKillIncrease(BaseNetworkGameCharacter character, int increaseAmount)
     {
-        if (gameRule != null)
+        if (gameRule != null && Characters.Contains(character))
             gameRule.OnKillIncrease(character, increaseAmount);
     }
 
     public virtual void OnUpdateCharacter(BaseNetworkGameCharacter character)
     {
-        if (gameRule != null)
+        if (gameRule != null && Characters.Contains(character))
             gameRule.OnUpdateCharacter(character);
     }
 
