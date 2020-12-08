@@ -119,18 +119,21 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
             return;
 
         if (gameRule != null)
+        {
             gameRule.OnUpdate();
 
-        if (Time.unscaledTime - updateScoreTime >= 1f)
-        {
-            if (gameRule == null || !gameRule.IsMatchEnded)
+            if (!IsMatchEnded && gameRule.IsMatchEnded)
+            {
                 UpdateMatchScores();
-            updateScoreTime = Time.unscaledTime;
-        }
+                if (isConnectOffline)
+                    RpcMatchStatus(gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
+                else
+                    photonView.OthersRPC(RpcMatchStatus, gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
+                IsMatchEnded = true;
+                MatchEndedAt = Time.unscaledTime;
+            }
 
-        if (gameRule != null)
-        {
-            if (Time.unscaledTime - updateMatchTime >= 1f)
+            if (!IsMatchEnded && Time.unscaledTime - updateMatchTime >= 1f)
             {
                 RemainsMatchTime = gameRule.RemainsMatchTime;
                 if (isConnectOffline)
@@ -139,13 +142,13 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
                     photonView.OthersRPC(RpcMatchStatus, gameRule.RemainsMatchTime, gameRule.IsMatchEnded);
                 updateMatchTime = Time.unscaledTime;
             }
+        }
 
-            if (!IsMatchEnded && gameRule.IsMatchEnded)
-            {
+        if (!IsMatchEnded && Time.unscaledTime - updateScoreTime >= 1f)
+        {
+            if (gameRule == null || !gameRule.IsMatchEnded)
                 UpdateMatchScores();
-                IsMatchEnded = true;
-                MatchEndedAt = Time.unscaledTime;
-            }
+            updateScoreTime = Time.unscaledTime;
         }
     }
 
