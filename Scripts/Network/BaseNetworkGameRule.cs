@@ -280,7 +280,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         List<BaseNetworkGameCharacter> result = new List<BaseNetworkGameCharacter>(FindObjectsOfType<BaseNetworkGameCharacter>());
         for (int i = result.Count - 1; i >= 0; --i)
         {
-            if (result[i].IsBot)
+            if (!result[i].IsBot)
                 result.RemoveAt(i);
         }
         return result;
