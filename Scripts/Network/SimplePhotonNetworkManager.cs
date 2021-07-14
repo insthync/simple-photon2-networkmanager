@@ -1013,7 +1013,7 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
                 countB++;
         }
         HashSet<int> viewIds = new HashSet<int>();
-        foreach (var view in PhotonNetwork.PhotonViews)
+        foreach (var view in PhotonNetwork.PhotonViewCollection)
         {
             viewIds.Add(view.ViewID);
         }
