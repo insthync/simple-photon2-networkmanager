@@ -16,23 +16,23 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     public const string TeamKillBKey = "tKB";
 
     [SerializeField]
-    private string title;
+    private string title = string.Empty;
     [SerializeField, TextArea]
-    private string description;
+    private string description = string.Empty;
     [SerializeField]
-    private int defaultBotCount;
+    private int defaultBotCount = 0;
     [HideInInspector]
     public int botCount;
     [SerializeField, Tooltip("Time in seconds, 0 = Unlimit")]
-    private int defaultMatchTime;
+    private int defaultMatchTime = 0;
     [HideInInspector]
     public int matchTime;
     [SerializeField, Tooltip("Match kill limit, 0 = Unlimit")]
-    private int defaultMatchKill;
+    private int defaultMatchKill = 0;
     [HideInInspector]
     public int matchKill;
     [SerializeField, Tooltip("Match score limit, 0 = Unlimit")]
-    private int defaultMatchScore;
+    private int defaultMatchScore = 0;
     [HideInInspector]
     public int matchScore;
     protected BaseNetworkGameManager networkManager;
