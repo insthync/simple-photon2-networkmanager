@@ -29,6 +29,8 @@ public abstract class BaseSyncVarRpcComponent<T> : BaseSyncVarRpcComponent
     [Serializable]
     public class ValueChangeEvent : UnityEvent<T> { }
 
+    public ValueChangeEvent onValueChange = new ValueChangeEvent();
+
     protected string rpcFunctionName;
     protected bool syncing = true;
     protected T _value;
@@ -56,6 +58,7 @@ public abstract class BaseSyncVarRpcComponent<T> : BaseSyncVarRpcComponent
             }
             if (HasChanges(value))
             {
+                onValueChange.Invoke(value);
                 _value = value;
                 syncing = true;
             }
