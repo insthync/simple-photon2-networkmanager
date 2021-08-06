@@ -15,17 +15,13 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
     public abstract bool IsDead { get; }
     public abstract bool IsBot { get; }
 
-    protected int _score;
-    protected int _killCount;
-    protected int _assistCount;
-    protected int _dieCount;
-
-    public virtual string playerName
+    public virtual string PlayerName
     {
         get { return (photonView != null && photonView.Owner != null) ? photonView.Owner.NickName : ""; }
         set { if (photonView.IsMine) photonView.Owner.NickName = value; }
     }
-    public virtual byte playerTeam
+
+    public virtual byte PlayerTeam
     {
         get
         {
@@ -44,55 +40,19 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
                 SimplePhotonNetworkManager.Singleton.SetTeam(photonView.Owner, value);
         }
     }
-    public int score
+
+    protected int _score;
+    public int SyncScore
     {
         get { return _score; }
         set
         {
-            if (PhotonNetwork.IsMasterClient && value != score)
+            if (PhotonNetwork.IsMasterClient && value != SyncScore)
             {
-                if (value > score && NetworkManager != null)
-                    NetworkManager.OnScoreIncrease(this, value - score);
+                if (value > SyncScore && NetworkManager != null)
+                    NetworkManager.OnScoreIncrease(this, value - SyncScore);
                 _score = value;
                 photonView.OthersRPC(RpcUpdateScore, value);
-            }
-        }
-    }
-    public int killCount
-    {
-        get { return _killCount; }
-        set
-        {
-            if (PhotonNetwork.IsMasterClient && value != killCount)
-            {
-                if (value > killCount && NetworkManager != null)
-                    NetworkManager.OnKillIncrease(this, value - killCount);
-                _killCount = value;
-                photonView.OthersRPC(RpcUpdateKillCount, value);
-            }
-        }
-    }
-    public int assistCount
-    {
-        get { return _assistCount; }
-        set
-        {
-            if (PhotonNetwork.IsMasterClient && value != assistCount)
-            {
-                _assistCount = value;
-                photonView.OthersRPC(RpcUpdateAssistCount, value);
-            }
-        }
-    }
-    public int dieCount
-    {
-        get { return _dieCount; }
-        set
-        {
-            if (PhotonNetwork.IsMasterClient && value != dieCount)
-            {
-                _dieCount = value;
-                photonView.OthersRPC(RpcUpdateDieCount, value);
             }
         }
     }
@@ -102,7 +62,23 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
         {
             if (IsDead && NetworkManager != null && NetworkManager.gameRule != null && NetworkManager.gameRule.ShowZeroScoreWhenDead)
                 return 0;
-            return score;
+            return SyncScore;
+        }
+    }
+
+    protected int _killCount;
+    public int SyncKillCount
+    {
+        get { return _killCount; }
+        set
+        {
+            if (PhotonNetwork.IsMasterClient && value != SyncKillCount)
+            {
+                if (value > SyncKillCount && NetworkManager != null)
+                    NetworkManager.OnKillIncrease(this, value - SyncKillCount);
+                _killCount = value;
+                photonView.OthersRPC(RpcUpdateKillCount, value);
+            }
         }
     }
     public int KillCount
@@ -111,7 +87,21 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
         {
             if (IsDead && NetworkManager != null && NetworkManager.gameRule != null && NetworkManager.gameRule.ShowZeroKillCountWhenDead)
                 return 0;
-            return killCount;
+            return SyncKillCount;
+        }
+    }
+
+    protected int _assistCount;
+    public int SyncAssistCount
+    {
+        get { return _assistCount; }
+        set
+        {
+            if (PhotonNetwork.IsMasterClient && value != SyncAssistCount)
+            {
+                _assistCount = value;
+                photonView.OthersRPC(RpcUpdateAssistCount, value);
+            }
         }
     }
     public int AssistCount
@@ -120,7 +110,21 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
         {
             if (IsDead && NetworkManager != null && NetworkManager.gameRule != null && NetworkManager.gameRule.ShowZeroAssistCountWhenDead)
                 return 0;
-            return assistCount;
+            return SyncAssistCount;
+        }
+    }
+
+    protected int _dieCount;
+    public int SyncDieCount
+    {
+        get { return _dieCount; }
+        set
+        {
+            if (PhotonNetwork.IsMasterClient && value != SyncDieCount)
+            {
+                _dieCount = value;
+                photonView.OthersRPC(RpcUpdateDieCount, value);
+            }
         }
     }
     public int DieCount
@@ -129,7 +133,7 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
         {
             if (IsDead && NetworkManager != null && NetworkManager.gameRule != null && NetworkManager.gameRule.ShowZeroDieCountWhenDead)
                 return 0;
-            return dieCount;
+            return SyncDieCount;
         }
     }
 
@@ -157,10 +161,10 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
     {
         if (!PhotonNetwork.IsMasterClient)
             return;
-        score = 0;
-        killCount = 0;
-        assistCount = 0;
-        dieCount = 0;
+        SyncScore = 0;
+        SyncKillCount = 0;
+        SyncAssistCount = 0;
+        SyncDieCount = 0;
     }
 
     protected virtual void Awake()
@@ -172,20 +176,20 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
     {
         if (!PhotonNetwork.IsMasterClient)
             return;
-        photonView.OthersRPC(RpcUpdateScore, score);
-        photonView.OthersRPC(RpcUpdateKillCount, killCount);
-        photonView.OthersRPC(RpcUpdateAssistCount, assistCount);
-        photonView.OthersRPC(RpcUpdateDieCount, dieCount);
+        photonView.OthersRPC(RpcUpdateScore, SyncScore);
+        photonView.OthersRPC(RpcUpdateKillCount, SyncKillCount);
+        photonView.OthersRPC(RpcUpdateAssistCount, SyncAssistCount);
+        photonView.OthersRPC(RpcUpdateDieCount, SyncDieCount);
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         if (!PhotonNetwork.IsMasterClient)
             return;
-        photonView.TargetRPC(RpcUpdateScore, newPlayer, score);
-        photonView.TargetRPC(RpcUpdateKillCount, newPlayer, killCount);
-        photonView.TargetRPC(RpcUpdateAssistCount, newPlayer, assistCount);
-        photonView.TargetRPC(RpcUpdateDieCount, newPlayer, dieCount);
+        photonView.TargetRPC(RpcUpdateScore, newPlayer, SyncScore);
+        photonView.TargetRPC(RpcUpdateKillCount, newPlayer, SyncKillCount);
+        photonView.TargetRPC(RpcUpdateAssistCount, newPlayer, SyncAssistCount);
+        photonView.TargetRPC(RpcUpdateDieCount, newPlayer, SyncDieCount);
     }
 
     protected virtual void OnStartServer()
@@ -234,36 +238,36 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, Syst
 
         foreach (var obj in noTeamObjects)
         {
-            obj.SetActive(playerTeam == 0);
+            obj.SetActive(PlayerTeam == 0);
         }
         foreach (var obj in teamAObjects)
         {
-            obj.SetActive(playerTeam == 1);
+            obj.SetActive(PlayerTeam == 1);
         }
         foreach (var obj in teamBObjects)
         {
-            obj.SetActive(playerTeam == 2);
+            obj.SetActive(PlayerTeam == 2);
         }
     }
 
     public void ResetScore()
     {
-        score = 0;
+        SyncScore = 0;
     }
 
     public void ResetKillCount()
     {
-        killCount = 0;
+        SyncKillCount = 0;
     }
 
     public void ResetAssistCount()
     {
-        assistCount = 0;
+        SyncAssistCount = 0;
     }
 
     public void ResetDieCount()
     {
-        dieCount = 0;
+        SyncDieCount = 0;
     }
 
     public int CompareTo(BaseNetworkGameCharacter other)

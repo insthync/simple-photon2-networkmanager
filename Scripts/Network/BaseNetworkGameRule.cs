@@ -269,7 +269,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
                 int countA;
                 int countB;
                 networkManager.CountTeamPlayers(out countA, out countB);
-                character.playerTeam = (byte)(countA > countB ? 2 : 1);
+                character.PlayerTeam = (byte)(countA > countB ? 2 : 1);
             }
             networkManager.RegisterCharacter(character);
         }
@@ -316,7 +316,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
                 int countA;
                 int countB;
                 networkManager.CountTeamPlayers(out countA, out countB);
-                character.playerTeam = (byte)(countA > countB ? 2 : 1);
+                character.PlayerTeam = (byte)(countA > countB ? 2 : 1);
             }
             networkManager.RegisterCharacter(character);
             count++;
@@ -390,7 +390,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         if (IsTeamGameplay)
         {
             // TODO: Improve team codes
-            switch (character.playerTeam)
+            switch (character.PlayerTeam)
             {
                 case 1:
                     TeamScoreA += increaseAmount;
@@ -412,7 +412,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         if (IsTeamGameplay)
         {
             // TODO: Improve team codes
-            switch (character.playerTeam)
+            switch (character.PlayerTeam)
             {
                 case 1:
                     TeamKillA += increaseAmount;
@@ -434,7 +434,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
         if (IsTeamGameplay)
         {
             // Use team score / kill as checker
-            switch (character.playerTeam)
+            switch (character.PlayerTeam)
             {
                 case 1:
                     checkScore = TeamScoreA;
