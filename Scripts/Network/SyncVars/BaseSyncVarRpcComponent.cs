@@ -64,7 +64,7 @@ public abstract class BaseSyncVarRpcComponent<T> : BaseSyncVarRpcComponent
 
     protected float syncCountdown = 0f;
 
-    protected void Awake()
+    protected virtual void Awake()
     {
         Type lookupType = GetType();
         string typeName = lookupType.Name;
@@ -92,7 +92,7 @@ public abstract class BaseSyncVarRpcComponent<T> : BaseSyncVarRpcComponent
         }
     }
 
-    protected void Start()
+    protected virtual void Start()
     {
         SyncToOther();
     }
