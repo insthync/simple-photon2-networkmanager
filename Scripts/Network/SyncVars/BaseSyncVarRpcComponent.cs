@@ -58,9 +58,9 @@ public abstract class BaseSyncVarRpcComponent<T> : BaseSyncVarRpcComponent
             }
             if (HasChanges(value))
             {
-                onValueChange.Invoke(value);
                 _value = value;
                 syncing = true;
+                onValueChange.Invoke(value);
             }
         }
     }
