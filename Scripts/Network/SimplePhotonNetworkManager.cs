@@ -218,6 +218,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void ConnectToMaster()
     {
+        if (PhotonNetwork.InLobby || PhotonNetwork.InRoom)
+            return;
         isConnectOffline = false;
         PhotonNetwork.AuthValues = new AuthenticationValues(System.Guid.NewGuid().ToString());
         PhotonNetwork.NetworkingClient.SerializationProtocol = ExitGames.Client.Photon.SerializationProtocol.GpBinaryV16;
@@ -230,6 +232,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void ConnectToBestCloudServer()
     {
+        if (PhotonNetwork.InLobby || PhotonNetwork.InRoom)
+            return;
         isConnectOffline = false;
         // Delete saved best region, to re-ping all regions, to fix unknow ping problem
         ServerSettings.ResetBestRegionCodeInPreferences();
@@ -244,6 +248,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void ConnectToRegion()
     {
+        if (PhotonNetwork.InLobby || PhotonNetwork.InRoom)
+            return;
         if (isLog) Debug.Log("Connecting to region " + region);
         // Hacking PUN, It seems like PUN won't connect to name server when call `PhotonNetwork.ConnectToRegion()`
         // Have to connect to best cloud server to make it connect to name server to get all regions list
@@ -265,6 +271,8 @@ public class SimplePhotonNetworkManager : MonoBehaviourPunCallbacks
 
     public virtual void ConnectToSavedCloudServer()
     {
+        if (PhotonNetwork.InLobby || PhotonNetwork.InRoom)
+            return;
         region = PlayerPrefs.GetString(saveSelectedRegionKey, string.Empty);
         if (string.IsNullOrEmpty(region))
             ConnectToBestCloudServer();
