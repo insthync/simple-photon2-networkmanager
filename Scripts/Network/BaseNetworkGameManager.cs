@@ -26,6 +26,15 @@ public abstract class BaseNetworkGameManager : SimplePhotonNetworkManager
     public float MatchEndedAt { get; protected set; }
     public bool MasterStarted { get; protected set; }
     public bool ClientStarted { get; protected set; }
+    public bool RankedByKillCount
+    {
+        get
+        {
+            if (gameRule != null)
+                return gameRule.RankedByKillCount;
+            return false;
+        }
+    }
 
     public int CountAliveCharacters()
     {

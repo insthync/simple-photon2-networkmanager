@@ -52,6 +52,7 @@ public abstract class BaseNetworkGameRule : ScriptableObject
     public virtual bool ShowZeroKillCountWhenDead { get { return false; } }
     public virtual bool ShowZeroAssistCountWhenDead { get { return false; } }
     public virtual bool ShowZeroDieCountWhenDead { get { return false; ; } }
+    public virtual bool RankedByKillCount { get { return false; } }
     public abstract bool CanCharacterRespawn(BaseNetworkGameCharacter character, params object[] extraParams);
     public abstract bool RespawnCharacter(BaseNetworkGameCharacter character, params object[] extraParams);
 

@@ -104,7 +104,7 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, ICom
             return NetworkManager.CanCharacterRespawn(this, extraParams);
         return true;
     }
-    
+
     public virtual bool Respawn(params object[] extraParams)
     {
         if (NetworkManager != null)
@@ -247,6 +247,9 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, ICom
 
     public int CompareTo(BaseNetworkGameCharacter other)
     {
-        return ((-1 * Score.CompareTo(other.Score)) * 10) + photonView.ViewID.CompareTo(other.photonView.ViewID);
+        if (NetworkManager.RankedByKillCount)
+            return ((-1 * KillCount.CompareTo(other.KillCount)) * 100) + ((-1 * KillCount.CompareTo(other.AssistCount)) * 10) + photonView.ViewID.CompareTo(other.photonView.ViewID);
+        else
+            return ((-1 * Score.CompareTo(other.Score)) * 10) + photonView.ViewID.CompareTo(other.photonView.ViewID);
     }
 }
