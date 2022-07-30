@@ -248,7 +248,7 @@ public abstract class BaseNetworkGameCharacter : MonoBehaviourPunCallbacks, ICom
     public int CompareTo(BaseNetworkGameCharacter other)
     {
         if (NetworkManager.RankedByKillCount)
-            return ((-1 * KillCount.CompareTo(other.KillCount)) * 100) + ((-1 * KillCount.CompareTo(other.AssistCount)) * 10) + photonView.ViewID.CompareTo(other.photonView.ViewID);
+            return ((-1 * KillCount.CompareTo(other.KillCount)) * 100) + ((-1 * AssistCount.CompareTo(other.AssistCount)) * 10) + photonView.ViewID.CompareTo(other.photonView.ViewID);
         else
             return ((-1 * Score.CompareTo(other.Score)) * 10) + photonView.ViewID.CompareTo(other.photonView.ViewID);
     }
