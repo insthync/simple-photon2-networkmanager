@@ -367,7 +367,7 @@ public class UIPhotonGameCreate : UIBase
         }
 
         // Setup events for inputs and set data by customized data
-        OnMapListChange(indexOfMap);
+        mapList.value = indexOfMap;
 
         int indexOfRule = -1;
         object gameRuleObject;
@@ -384,7 +384,7 @@ public class UIPhotonGameCreate : UIBase
         }
 
         // Setup events for inputs and set data by customized data
-        OnGameRuleListChange(indexOfRule);
+        gameRuleList.value = indexOfRule;
 
         object botCountObject;
         if (inputBotCount != null && oldProperties.TryGetValue(BaseNetworkGameManager.CUSTOM_ROOM_GAME_RULE_BOT_COUNT, out botCountObject))
